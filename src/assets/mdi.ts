@@ -78,7 +78,8 @@ import {
   mdiStop,
   mdiCrown,
   mdiFormatTitle,
-  mdiCloseCircle
+  mdiCloseCircle,
+  mdiChevronDown
 } from '@mdi/js'
 
 interface MdiIconsMapping {
@@ -129,6 +130,7 @@ const mdi: MdiIconsMapping = {
   'chevron-left': mdiChevronLeft,
   'chevron-right': mdiChevronRight,
   'chevron-up': mdiChevronUp,
+  'chevron-down': mdiChevronDown,
   bookmark: mdiBookmark,
   'bookmark-multiple': mdiBookmarkMultiple,
   'bookmark-check': mdiBookmarkCheck,

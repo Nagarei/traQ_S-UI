@@ -63,7 +63,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'entryMessageLoaded', _relativePos: number): void
   (e: 'changeHeight', _data: ChangeHeightData): void
-  (e: 'intersected', _messageId: MessageId): void
+  (e: 'intersected', _createdAt: string): void
 }>()
 
 const bodyRef = shallowRef<HTMLDivElement | null>(null)
@@ -90,7 +90,7 @@ const observer = new IntersectionObserver(
   entries => {
     if (entries[0]?.isIntersecting) {
       if (message.value === undefined) return
-      emit('intersected', message.value.id)
+      emit('intersected', message.value.createdAt)
     }
   },
   {
