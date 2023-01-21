@@ -4,6 +4,7 @@
     <channel-view-content-showing-date
       v-if="showingDate"
       :showing-date="showingDate"
+      :channel-id="channelId"
     />
     <messages-scroller
       ref="scrollerEle"
