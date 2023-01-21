@@ -141,7 +141,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'requestLoadFormer'): void
   (e: 'requestLoadLatter'): void
-  (e: 'endSepratorIntersected'): void
+  (e: 'endSeparatorIntersected'): void
 }>()
 
 const { lastScrollPosition } = useMainViewStore()
@@ -242,7 +242,7 @@ const endSeparatorRef = ref<InstanceType<
 const observer = new IntersectionObserver(
   entries => {
     if (entries[0]?.isIntersecting) {
-      emit('endSepratorIntersected')
+      emit('endSeparatorIntersected')
     }
   },
   {
