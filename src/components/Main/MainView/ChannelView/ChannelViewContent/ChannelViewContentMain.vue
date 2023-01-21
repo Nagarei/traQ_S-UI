@@ -1,6 +1,9 @@
 <template>
-  <div :class="$style.container">
+  <div ref="containerRef" :class="$style.container">
     <scroll-loading-bar :class="$style.loadingBar" :show="isLoading" />
+    <div v-if="showingDate" :class="$style.showingDate">
+      {{ showingDate }}
+    </div>
     <messages-scroller
       ref="scrollerEle"
       :message-ids="messageIds"
@@ -9,8 +12,10 @@
       :is-loading="isLoading"
       :entry-message-id="entryMessageId"
       :last-loading-direction="lastLoadingDirection"
+      :container-ref="containerRef"
       @request-load-former="onLoadFormerMessagesRequest"
       @request-load-latter="onLoadLatterMessagesRequest"
+      @end-separator-intersected="onEndSeparatorIntersected"
     >
       <template #default="{ messageId, onChangeHeight, onEntryMessageLoaded }">
         <messages-scroller-separator
@@ -29,8 +34,10 @@
           :is-archived="isArchived"
           :is-entry-message="messageId === entryMessageId"
           :pinned-user-id="messagePinnedUserMap.get(messageId)"
+          :container-ref="containerRef"
           @change-height="onChangeHeight"
           @entry-message-loaded="onEntryMessageLoaded"
+          @intersected="onMessageIntersected"
         />
       </template>
     </messages-scroller>
@@ -42,7 +49,7 @@
 import MessagesScroller from '/@/components/Main/MainView/MessagesScroller/MessagesScroller.vue'
 import MessageInput from '/@/components/Main/MainView/MessageInput/MessageInput.vue'
 import ScrollLoadingBar from '/@/components/Main/MainView/ScrollLoadingBar.vue'
-import { computed, shallowRef } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import type { ChannelId, MessageId, UserId } from '/@/types/entity-ids'
 import useChannelMessageFetcher from './composables/useChannelMessageFetcher'
 import { useChannelsStore } from '/@/store/entities/channels'
@@ -100,6 +107,16 @@ const isArchived = computed(
 const messagePinnedUserMap = computed(
   () => new Map(props.pinnedMessages.map(pin => [pin.message.id, pin.userId]))
 )
+
+const containerRef = ref<HTMLDivElement | null>(null)
+const showingDate = ref<string | undefined>()
+const onMessageIntersected = (messageId: MessageId) => {
+  showingDate.value = createdDate(messageId)
+}
+const onEndSeparatorIntersected = () => {
+  if (showingDate.value === undefined) return
+  showingDate.value = undefined
+}
 </script>
 
 <style lang="scss" module>
@@ -131,5 +148,20 @@ const messagePinnedUserMap = computed(
 .element {
   margin: 4px 0;
   contain: content;
+}
+
+.showingDate {
+  position: absolute;
+  inset: 12px 0 auto;
+  margin: 0 auto;
+  padding: 4px 8px;
+  width: 160px;
+  background-color: white;
+  border-radius: 24px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid $theme-ui-tertiary-default;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  z-index: $z-index-showing-message-date;
 }
 </style>

@@ -12,6 +12,7 @@
     >
       <messages-scroller-separator
         v-if="isReachedEnd"
+        ref="endSeparatorRef"
         title="これ以上メッセージはありません"
         :class="$style.noMoreSeparator"
       />
@@ -29,6 +30,8 @@
 
 <script lang="ts">
 import type { Ref } from 'vue'
+import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 import { watch, reactive, computed, onMounted, nextTick, shallowRef } from 'vue'
 import type { MessageId } from '/@/types/entity-ids'
 import type { LoadingDirection } from './composables/useMessagesFetcher'
@@ -128,6 +131,7 @@ const props = withDefaults(
     isLoading?: boolean
     entryMessageId?: MessageId
     lastLoadingDirection: LoadingDirection
+    containerRef: HTMLDivElement | null
   }>(),
   {
     isLoading: false
@@ -137,6 +141,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'requestLoadFormer'): void
   (e: 'requestLoadLatter'): void
+  (e: 'endSepratorIntersected'): void
 }>()
 
 const { lastScrollPosition } = useMainViewStore()
@@ -230,6 +235,32 @@ const handleScroll = throttle(17, () => {
 
 const { onClick } = useMarkdownInternalHandler()
 useScrollRestoration(rootRef, state)
+
+const endSeparatorRef = ref<InstanceType<
+  typeof MessagesScrollerSeparator
+> | null>(null)
+const observer = new IntersectionObserver(
+  entries => {
+    if (entries[0]?.isIntersecting) {
+      emit('endSepratorIntersected')
+    }
+  },
+  {
+    root: props.containerRef,
+    rootMargin: '0px 0px -95%'
+  }
+)
+onMounted(() => {
+  if (
+    endSeparatorRef.value === null ||
+    endSeparatorRef.value.containerRef === null
+  )
+    return
+  observer.observe(endSeparatorRef.value.containerRef)
+})
+onUnmounted(() => {
+  observer.disconnect()
+})
 </script>
 
 <style lang="scss" module>

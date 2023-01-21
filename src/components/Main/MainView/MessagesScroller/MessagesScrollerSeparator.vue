@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style.container">
+  <div ref="containerRef" :class="$style.container">
     <div :class="$style.title">
       {{ title }}
     </div>
@@ -7,9 +7,14 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
+
 defineProps<{
   title: string
 }>()
+const containerRef = ref<HTMLDivElement | null>(null)
+
+defineExpose({ containerRef })
 </script>
 
 <style lang="scss" module>
