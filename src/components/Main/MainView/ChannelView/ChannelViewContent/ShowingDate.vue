@@ -1,12 +1,21 @@
 <template>
   <div :class="$style.container">
     <div :class="$style.innerContainer">
-      <button :class="$style.button" @click="togglePopupMenu">
+      <button :class="$style.button" @click="handleTogglePopupMenu">
         {{ showingDate }}
         <a-icon name="chevron-down" mdi />
       </button>
-      <click-outside v-if="isPopupMenuShown" @click-outside="closePopupMenu">
-        <showing-date-menu :class="$style.toolsMenu" :channel-id="channelId" />
+      <click-outside
+        v-if="isPopupMenuShown"
+        stop
+        @click-outside="closePopupMenu"
+      >
+        <showing-date-menu
+          :class="$style.toolsMenu"
+          :last-week-message-id="lastWeekMessageId"
+          :last-month-message-id="lastMonthMessageId"
+          :first-message-id="firstMessageId"
+        />
       </click-outside>
     </div>
   </div>
@@ -18,15 +27,52 @@ import type { ChannelId } from '/@/types/entity-ids'
 import ClickOutside from '/@/components/UI/ClickOutside'
 import useToggle from '/@/composables/utils/useToggle'
 import ShowingDateMenu from './ShowingDateMenu.vue'
+import apis from '/@/lib/apis'
+import { ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   channelId: ChannelId
   showingDate: string
 }>()
 
+const useFetchMessage = async (date: Date | null) => {
+  const messages = (
+    await apis.getMessages(
+      props.channelId,
+      1,
+      undefined,
+      date?.toISOString() ?? undefined,
+      undefined,
+      true,
+      'asc'
+    )
+  ).data
+  if (messages[0] === undefined) {
+    return null
+  }
+  const messageId = messages[0].id
+  return messageId
+}
+
+const lastWeekMessageId = ref<string | null>(null)
+const lastMonthMessageId = ref<string | null>(null)
+const firstMessageId = ref<string | null>(null)
+
+const handleTogglePopupMenu = async () => {
+  const date = new Date()
+  const lastWeekDate = new Date()
+  lastWeekDate.setDate(date.getDate() - 7)
+  lastWeekMessageId.value = await useFetchMessage(lastWeekDate)
+  const lastMonthDate = new Date()
+  lastMonthDate.setMonth(date.getMonth() - 1)
+  lastMonthMessageId.value = await useFetchMessage(lastMonthDate)
+  firstMessageId.value = await useFetchMessage(null)
+  openPopupMenu()
+}
+
 const {
   value: isPopupMenuShown,
-  toggle: togglePopupMenu,
+  open: openPopupMenu,
   close: closePopupMenu
 } = useToggle(false)
 </script>
