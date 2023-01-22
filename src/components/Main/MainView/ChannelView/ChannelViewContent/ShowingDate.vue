@@ -6,10 +6,7 @@
         <a-icon name="chevron-down" mdi />
       </button>
       <click-outside v-if="isPopupMenuShown" @click-outside="closePopupMenu">
-        <channel-view-content-showing-date-menu
-          :class="$style.toolsMenu"
-          :channel-id="channelId"
-        />
+        <showing-date-menu :class="$style.toolsMenu" :channel-id="channelId" />
       </click-outside>
     </div>
   </div>
@@ -20,7 +17,7 @@ import AIcon from '/@/components/UI/AIcon.vue'
 import type { ChannelId } from '/@/types/entity-ids'
 import ClickOutside from '/@/components/UI/ClickOutside'
 import useToggle from '/@/composables/utils/useToggle'
-import ChannelViewContentShowingDateMenu from './ChannelViewContentShowingDateMenu.vue'
+import ShowingDateMenu from './ShowingDateMenu.vue'
 
 defineProps<{
   channelId: ChannelId

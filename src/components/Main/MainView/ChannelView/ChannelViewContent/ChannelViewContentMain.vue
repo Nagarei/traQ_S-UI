@@ -1,9 +1,9 @@
 <template>
   <div ref="containerRef" :class="$style.container">
     <scroll-loading-bar :class="$style.loadingBar" :show="isLoading" />
-    <channel-view-content-showing-date
-      v-if="showingDate"
-      :showing-date="showingDate"
+    <showing-date
+      v-if="showingDateValue"
+      :showing-date="showingDateValue"
       :channel-id="channelId"
     />
     <messages-scroller
@@ -61,7 +61,7 @@ import { useMessagesStore } from '/@/store/entities/messages'
 import useDayDiffMessages from './composables/useDayDiffMessages'
 import { getFullDayString } from '/@/lib/basic/date'
 import type { Pin } from '@traptitech/traq'
-import ChannelViewContentShowingDate from '/@/components/Main/MainView/ChannelView/ChannelViewContent/ChannelViewContentShowingDate.vue'
+import ShowingDate from './ShowingDate.vue'
 
 const props = defineProps<{
   channelId: ChannelId
@@ -112,13 +112,13 @@ const messagePinnedUserMap = computed(
 )
 
 const containerRef = ref<HTMLDivElement | null>(null)
-const showingDate = ref<string | undefined>()
+const showingDateValue = ref<string | undefined>()
 const onMessageIntersected = (createdAt: string) => {
-  showingDate.value = getFullDayString(new Date(createdAt))
+  showingDateValue.value = getFullDayString(new Date(createdAt))
 }
 const onEndSeparatorIntersected = () => {
-  if (showingDate.value === undefined) return
-  showingDate.value = undefined
+  if (showingDateValue.value === undefined) return
+  showingDateValue.value = undefined
 }
 </script>
 

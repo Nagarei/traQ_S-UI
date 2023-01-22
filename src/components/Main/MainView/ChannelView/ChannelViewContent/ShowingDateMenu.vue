@@ -1,29 +1,20 @@
 <template>
   <div :class="$style.container">
-    <ChannelViewContentShowingDateMenuItem
-      :date="lastWeekDate"
-      :channel-id="channelId"
-    >
+    <ShowingDateMenuItem :date="lastWeekDate" :channel-id="channelId">
       先週へ
-    </ChannelViewContentShowingDateMenuItem>
-    <ChannelViewContentShowingDateMenuItem
-      :date="lastMonthDate"
-      :channel-id="channelId"
-    >
+    </ShowingDateMenuItem>
+    <ShowingDateMenuItem :date="lastMonthDate" :channel-id="channelId">
       先月へ
-    </ChannelViewContentShowingDateMenuItem>
-    <ChannelViewContentShowingDateMenuItem
-      :date="firstDate"
-      :channel-id="channelId"
-    >
+    </ShowingDateMenuItem>
+    <ShowingDateMenuItem :date="firstDate" :channel-id="channelId">
       最初へ
-    </ChannelViewContentShowingDateMenuItem>
+    </ShowingDateMenuItem>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { ChannelId } from '/@/types/entity-ids'
-import ChannelViewContentShowingDateMenuItem from './ChannelViewContentShowingDateMenuItem.vue'
+import ShowingDateMenuItem from './ShowingDateMenuItem.vue'
 import { computed } from 'vue'
 
 defineProps<{
