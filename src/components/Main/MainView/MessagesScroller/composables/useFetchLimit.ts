@@ -5,11 +5,11 @@ import useBoxSize from '/@/composables/dom/useBoxSize'
 const MAX_COUNT = 20
 
 const useFetchLimit = (
-  scrollerEle: Ref<{ $el: HTMLDivElement } | undefined> | undefined,
+  scrollerEle: Ref<{ $el: HTMLDivElement } | undefined>,
   messageHeight: number
 ) => {
   const { height } = useBoxSize(
-    computed(() => scrollerEle?.value?.$el ?? null),
+    computed(() => scrollerEle.value?.$el ?? null),
     false
   )
 

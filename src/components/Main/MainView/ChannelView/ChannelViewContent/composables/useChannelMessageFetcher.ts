@@ -25,7 +25,7 @@ interface GetMessagesParams {
 }
 
 const useChannelMessageFetcher = (
-  scrollerEle: Ref<{ $el: HTMLDivElement } | undefined> | undefined,
+  scrollerEle: Ref<{ $el: HTMLDivElement } | undefined>,
   props: {
     channelId: ChannelId
     entryMessageId?: MessageId

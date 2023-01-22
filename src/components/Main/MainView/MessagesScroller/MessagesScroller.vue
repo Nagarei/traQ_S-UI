@@ -131,7 +131,7 @@ const props = withDefaults(
     isLoading?: boolean
     entryMessageId?: MessageId
     lastLoadingDirection: LoadingDirection
-    containerRef: HTMLDivElement | null
+    containerRef?: HTMLDivElement | null
   }>(),
   {
     isLoading: false
