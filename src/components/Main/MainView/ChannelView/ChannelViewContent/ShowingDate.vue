@@ -29,11 +29,14 @@ import useToggle from '/@/composables/utils/useToggle'
 import ShowingDateMenu from './ShowingDateMenu.vue'
 import apis from '/@/lib/apis'
 import { ref } from 'vue'
+import { useMessagesView } from '/@/store/domain/messagesView'
 
 const props = defineProps<{
   channelId: ChannelId
   showingDate: string
 }>()
+
+const { messageIdsWithSpecifiedDateMap } = useMessagesView()
 
 const fetchMessageByDate = async (date: Date | null) => {
   const messages = (
@@ -59,14 +62,30 @@ const lastMonthMessageId = ref<string | null>(null)
 const firstMessageId = ref<string | null>(null)
 
 const handleTogglePopupMenu = async () => {
-  const date = new Date()
-  const lastWeekDate = new Date()
-  lastWeekDate.setDate(date.getDate() - 7)
-  lastWeekMessageId.value = await fetchMessageByDate(lastWeekDate)
-  const lastMonthDate = new Date()
-  lastMonthDate.setMonth(date.getMonth() - 1)
-  lastMonthMessageId.value = await fetchMessageByDate(lastMonthDate)
-  firstMessageId.value = await fetchMessageByDate(null)
+  const messagesWithSpecifiedDate = messageIdsWithSpecifiedDateMap.value.get(
+    props.channelId
+  )
+  if (messagesWithSpecifiedDate !== undefined) {
+    lastWeekMessageId.value = messagesWithSpecifiedDate.lastWeekMessageId
+    lastMonthMessageId.value = messagesWithSpecifiedDate.lastMonthMessageId
+    firstMessageId.value = messagesWithSpecifiedDate.firstMessageId
+  } else {
+    const date = new Date()
+    const lastWeekDate = new Date()
+    lastWeekDate.setDate(date.getDate() - 7)
+    const lastMonthDate = new Date()
+    lastMonthDate.setMonth(date.getMonth() - 1)
+
+    lastWeekMessageId.value = await fetchMessageByDate(lastWeekDate)
+    lastMonthMessageId.value = await fetchMessageByDate(lastMonthDate)
+    firstMessageId.value = await fetchMessageByDate(null)
+
+    messageIdsWithSpecifiedDateMap.value.set(props.channelId, {
+      lastWeekMessageId: lastWeekMessageId.value,
+      lastMonthMessageId: lastMonthMessageId.value,
+      firstMessageId: firstMessageId.value
+    })
+  }
   openPopupMenu()
 }
 
