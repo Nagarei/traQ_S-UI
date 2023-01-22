@@ -246,18 +246,21 @@ const observer = new IntersectionObserver(
     }
   },
   {
-    root: props.containerRef,
-    rootMargin: '0px 0px -95%'
+    root: props.containerRef
   }
 )
-onMounted(() => {
-  if (
-    endSeparatorRef.value === null ||
-    endSeparatorRef.value.containerRef === null
-  )
-    return
-  observer.observe(endSeparatorRef.value.containerRef)
-})
+watch(
+  () => props.isReachedEnd,
+  async () => {
+    await nextTick()
+    if (
+      endSeparatorRef.value === null ||
+      endSeparatorRef.value.containerRef === null
+    )
+      return
+    observer.observe(endSeparatorRef.value.containerRef)
+  }
+)
 onUnmounted(() => {
   observer.disconnect()
 })
