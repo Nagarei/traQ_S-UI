@@ -1,14 +1,14 @@
 <template>
   <div :class="$style.container">
-    <ShowingDateMenuItem :date="lastWeekDate" :channel-id="channelId">
+    <showing-date-menu-item :date="lastWeekDate" :channel-id="channelId">
       先週へ
-    </ShowingDateMenuItem>
-    <ShowingDateMenuItem :date="lastMonthDate" :channel-id="channelId">
+    </showing-date-menu-item>
+    <showing-date-menu-item :date="lastMonthDate" :channel-id="channelId">
       先月へ
-    </ShowingDateMenuItem>
-    <ShowingDateMenuItem :date="firstDate" :channel-id="channelId">
+    </showing-date-menu-item>
+    <showing-date-menu-item :date="firstDate" :channel-id="channelId">
       最初へ
-    </ShowingDateMenuItem>
+    </showing-date-menu-item>
   </div>
 </template>
 
