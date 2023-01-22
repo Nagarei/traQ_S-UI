@@ -257,8 +257,7 @@ const useChannelMessageFetcher = (
 
   return {
     ...messagesFetcher,
-    unreadSince,
-    fetchMessagesByChannelId
+    unreadSince
   }
 }
 

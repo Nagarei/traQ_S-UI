@@ -35,7 +35,7 @@ const props = defineProps<{
   showingDate: string
 }>()
 
-const useFetchMessage = async (date: Date | null) => {
+const fetchMessageByDate = async (date: Date | null) => {
   const messages = (
     await apis.getMessages(
       props.channelId,
@@ -62,11 +62,11 @@ const handleTogglePopupMenu = async () => {
   const date = new Date()
   const lastWeekDate = new Date()
   lastWeekDate.setDate(date.getDate() - 7)
-  lastWeekMessageId.value = await useFetchMessage(lastWeekDate)
+  lastWeekMessageId.value = await fetchMessageByDate(lastWeekDate)
   const lastMonthDate = new Date()
   lastMonthDate.setMonth(date.getMonth() - 1)
-  lastMonthMessageId.value = await useFetchMessage(lastMonthDate)
-  firstMessageId.value = await useFetchMessage(null)
+  lastMonthMessageId.value = await fetchMessageByDate(lastMonthDate)
+  firstMessageId.value = await fetchMessageByDate(null)
   openPopupMenu()
 }
 
