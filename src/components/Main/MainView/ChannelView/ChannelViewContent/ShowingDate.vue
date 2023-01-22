@@ -15,6 +15,7 @@
           :last-week-message-id="lastWeekMessageId"
           :last-month-message-id="lastMonthMessageId"
           :first-message-id="firstMessageId"
+          @click="closePopupMenu"
         />
       </click-outside>
     </div>
@@ -101,7 +102,7 @@ const {
   position: absolute;
   inset: 12px 0 auto;
   margin: 0 auto;
-  width: 140px;
+  width: 152px;
   z-index: $z-index-showing-message-date;
 }
 .innerContainer {
@@ -110,7 +111,7 @@ const {
 .button {
   background-color: white;
   border-radius: 24px;
-  padding: 4px 8px;
+  padding: 4px 16px;
   text-align: center;
   font-weight: bold;
   border: 1px solid $theme-ui-tertiary-default;
