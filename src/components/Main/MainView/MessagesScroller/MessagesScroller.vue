@@ -12,7 +12,7 @@
     >
       <messages-scroller-separator
         v-if="isReachedEnd"
-        ref="endSeparatorRef"
+        ref="endSeparatorEle"
         title="これ以上メッセージはありません"
         :class="$style.noMoreSeparator"
       />
@@ -30,7 +30,6 @@
 
 <script lang="ts">
 import type { Ref } from 'vue'
-import { ref } from 'vue'
 import { onUnmounted } from 'vue'
 import { watch, reactive, computed, onMounted, nextTick, shallowRef } from 'vue'
 import type { MessageId } from '/@/types/entity-ids'
@@ -236,9 +235,7 @@ const handleScroll = throttle(17, () => {
 const { onClick } = useMarkdownInternalHandler()
 useScrollRestoration(rootRef, state)
 
-const endSeparatorRef = ref<InstanceType<
-  typeof MessagesScrollerSeparator
-> | null>(null)
+const endSeparatorEle = shallowRef<{ $el: HTMLDivElement } | undefined>()
 const observer = new IntersectionObserver(
   entries => {
     if (entries[0]?.isIntersecting) {
@@ -253,12 +250,8 @@ watch(
   () => props.isReachedEnd,
   async () => {
     await nextTick()
-    if (
-      endSeparatorRef.value === null ||
-      endSeparatorRef.value.containerRef === null
-    )
-      return
-    observer.observe(endSeparatorRef.value.containerRef)
+    if (endSeparatorEle.value === undefined) return
+    observer.observe(endSeparatorEle.value.$el)
   }
 )
 onUnmounted(() => {
