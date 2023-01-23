@@ -7,7 +7,6 @@
 </template>
 
 <script lang="ts" setup>
-
 defineProps<{
   title: string
 }>()
