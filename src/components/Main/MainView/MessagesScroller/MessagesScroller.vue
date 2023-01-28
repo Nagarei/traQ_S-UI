@@ -250,7 +250,7 @@ watch(
   () => props.isReachedEnd,
   async () => {
     await nextTick()
-    if (endSeparatorEle.value === undefined) return
+    if (endSeparatorEle.value === undefined||props.containerRef===undefined) return
     observer.observe(endSeparatorEle.value.$el)
   }
 )

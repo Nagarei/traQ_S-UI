@@ -99,7 +99,7 @@ const observer = new IntersectionObserver(
   }
 )
 onMounted(() => {
-  if (bodyRef.value === null) return
+  if (bodyRef.value === null || props.containerRef === undefined) return
   observer.observe(bodyRef.value)
 })
 onUnmounted(() => {

@@ -8,9 +8,9 @@ import type { ChannelId, MessageId } from '/@/types/entity-ids'
 import { useMessagesStore } from '/@/store/entities/messages'
 
 export interface messageIdWithSpecifiedDate {
-  lastWeekMessageId: string | null
-  lastMonthMessageId: string | null
-  firstMessageId: string | null
+  lastWeek: string | null
+  lastMonth: string | null
+  first: string | null
 }
 
 const ignoredHostNamesSet = new Set<string>(

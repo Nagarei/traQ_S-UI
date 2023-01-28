@@ -12,9 +12,7 @@
       >
         <showing-date-menu
           :class="$style.toolsMenu"
-          :last-week-message-id="lastWeekMessageId"
-          :last-month-message-id="lastMonthMessageId"
-          :first-message-id="firstMessageId"
+          :message-ids="messageIds"
           @click="closePopupMenu"
         />
       </click-outside>
@@ -30,6 +28,7 @@ import useToggle from '/@/composables/utils/useToggle'
 import ShowingDateMenu from './ShowingDateMenu.vue'
 import apis from '/@/lib/apis'
 import { ref } from 'vue'
+import type { messageIdWithSpecifiedDate } from '/@/store/domain/messagesView'
 import { useMessagesView } from '/@/store/domain/messagesView'
 
 const props = defineProps<{
@@ -58,18 +57,20 @@ const fetchMessageByDate = async (date: Date | null) => {
   return messageId
 }
 
-const lastWeekMessageId = ref<string | null>(null)
-const lastMonthMessageId = ref<string | null>(null)
-const firstMessageId = ref<string | null>(null)
+const messageIds = ref<messageIdWithSpecifiedDate>({
+  lastWeek: null,
+  lastMonth: null,
+  first: null
+})
 
 const handleTogglePopupMenu = async () => {
   const messagesWithSpecifiedDate = messageIdsWithSpecifiedDateMap.value.get(
     props.channelId
   )
   if (messagesWithSpecifiedDate !== undefined) {
-    lastWeekMessageId.value = messagesWithSpecifiedDate.lastWeekMessageId
-    lastMonthMessageId.value = messagesWithSpecifiedDate.lastMonthMessageId
-    firstMessageId.value = messagesWithSpecifiedDate.firstMessageId
+    messageIds.value.lastWeek = messagesWithSpecifiedDate.lastWeek
+    messageIds.value.lastMonth = messagesWithSpecifiedDate.lastMonth
+    messageIds.value.first = messagesWithSpecifiedDate.first
   } else {
     const date = new Date()
     const lastWeekDate = new Date()
@@ -77,14 +78,14 @@ const handleTogglePopupMenu = async () => {
     const lastMonthDate = new Date()
     lastMonthDate.setMonth(date.getMonth() - 1)
 
-    lastWeekMessageId.value = await fetchMessageByDate(lastWeekDate)
-    lastMonthMessageId.value = await fetchMessageByDate(lastMonthDate)
-    firstMessageId.value = await fetchMessageByDate(null)
+    messageIds.value.lastWeek = await fetchMessageByDate(lastWeekDate)
+    messageIds.value.lastMonth = await fetchMessageByDate(lastMonthDate)
+    messageIds.value.first = await fetchMessageByDate(null)
 
     messageIdsWithSpecifiedDateMap.value.set(props.channelId, {
-      lastWeekMessageId: lastWeekMessageId.value,
-      lastMonthMessageId: lastMonthMessageId.value,
-      firstMessageId: firstMessageId.value
+      lastWeek: messageIds.value.lastWeek,
+      lastMonth: messageIds.value.lastMonth,
+      first: messageIds.value.first
     })
   }
   openPopupMenu()
