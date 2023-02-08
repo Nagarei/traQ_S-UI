@@ -2,7 +2,7 @@
   <div :class="$style.container">
     <div :class="$style.innerContainer">
       <button :class="$style.button" @click="handleTogglePopupMenu">
-        {{ showingDate }}
+        {{ shownMessageDate }}
         <a-icon name="chevron-down" mdi />
       </button>
       <click-outside
@@ -10,7 +10,7 @@
         stop
         @click-outside="closePopupMenu"
       >
-        <showing-date-menu
+        <shown-message-date-menu
           :class="$style.toolsMenu"
           :message-ids="messageIds"
           @click="closePopupMenu"
@@ -25,7 +25,7 @@ import AIcon from '/@/components/UI/AIcon.vue'
 import type { ChannelId } from '/@/types/entity-ids'
 import ClickOutside from '/@/components/UI/ClickOutside'
 import useToggle from '/@/composables/utils/useToggle'
-import ShowingDateMenu from './ShowingDateMenu.vue'
+import ShownMessageDateMenu from './ShownMessageDateMenu.vue'
 import apis from '/@/lib/apis'
 import { ref } from 'vue'
 import type { messageIdWithSpecifiedDate } from '/@/store/domain/messagesView'
@@ -33,7 +33,7 @@ import { useMessagesView } from '/@/store/domain/messagesView'
 
 const props = defineProps<{
   channelId: ChannelId
-  showingDate: string
+  shownMessageDate: string
 }>()
 
 const { messageIdsWithSpecifiedDateMap } = useMessagesView()
@@ -104,7 +104,7 @@ const {
   inset: 12px 0 auto;
   margin: 0 auto;
   width: 152px;
-  z-index: $z-index-showing-message-date;
+  z-index: $z-index-shown-message-date;
 }
 .innerContainer {
   position: relative;
@@ -129,6 +129,6 @@ const {
   position: absolute;
   right: 0;
   top: 36px;
-  z-index: $z-index-showing-message-date-menu;
+  z-index: $z-index-shown-message-date-menu;
 }
 </style>

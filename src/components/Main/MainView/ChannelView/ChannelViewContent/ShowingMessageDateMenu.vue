@@ -1,31 +1,31 @@
 <template>
   <div :class="$style.container">
-    <showing-date-menu-item
+    <shown-message-date-menu-item
       v-if="messageIds.lastWeek"
       :message-id="messageIds.lastWeek"
       @click="emit('click')"
     >
       先週へ
-    </showing-date-menu-item>
-    <showing-date-menu-item
+    </shown-message-date-menu-item>
+    <shown-message-date-menu-item
       v-if="messageIds.lastMonth"
       :message-id="messageIds.lastMonth"
       @click="emit('click')"
     >
       先月へ
-    </showing-date-menu-item>
-    <showing-date-menu-item
+    </shown-message-date-menu-item>
+    <shown-message-date-menu-item
       v-if="messageIds.first"
       :message-id="messageIds.first"
       @click="emit('click')"
     >
       最初へ
-    </showing-date-menu-item>
+    </shown-message-date-menu-item>
   </div>
 </template>
 
 <script lang="ts" setup>
-import ShowingDateMenuItem from './ShowingDateMenuItem.vue'
+import ShownMessageDateMenuItem from './ShownMessageDateMenuItem.vue'
 import type { messageIdWithSpecifiedDate } from '/@/store/domain/messagesView'
 
 defineProps<{
