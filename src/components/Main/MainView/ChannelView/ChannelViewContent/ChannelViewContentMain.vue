@@ -102,8 +102,16 @@ const createdDate = (id: MessageId) => {
   if (!message) {
     return ''
   }
-
-  return getFullDayString(new Date(message.createdAt))
+  const messageDate = new Date(message.createdAt)
+  const messageDateString = getFullDayString(messageDate)
+  const messageDateTime = Math.floor(messageDate.getTime() / 86400000)
+  const todayTime = Math.floor(new Date().getTime() / 86400000)
+  if (messageDateTime === todayTime) {
+    return "今日 (" + messageDateString + ")"
+  } else if (messageDateTime === (todayTime - 1)) {
+    return "昨日 (" + messageDateString + ")"
+  }
+  return messageDateString
 }
 
 const { channelsMap } = useChannelsStore()
