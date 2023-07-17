@@ -102,13 +102,13 @@ const createdDate = (id: MessageId) => {
   if (!message) {
     return ''
   }
+  
   const messageDate = new Date(message.createdAt)
   const messageDateString = getFullDayString(messageDate)
-  const messageDateTime = Math.floor(messageDate.getTime() / 86400000)
-  const todayTime = Math.floor(new Date().getTime() / 86400000)
-  if (messageDateTime === todayTime) {
+  const today = new Date()
+  if (messageDateString === getFullDayString(today)) {
     return "今日 (" + messageDateString + ")"
-  } else if (messageDateTime === (todayTime - 1)) {
+  } else if (messageDateString === getFullDayString(new Date(today).setDate(today.getDate() - 1))) {
     return "昨日 (" + messageDateString + ")"
   }
   return messageDateString
