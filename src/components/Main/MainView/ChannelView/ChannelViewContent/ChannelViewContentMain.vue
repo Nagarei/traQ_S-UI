@@ -17,6 +17,8 @@
       :container-ref="containerRef"
       @request-load-former="onLoadFormerMessagesRequest"
       @request-load-latter="onLoadLatterMessagesRequest"
+      @scroll.passive="handleScroll"
+      @reset-is-reached-latest="resetIsReachedLatest"
       @end-separator-intersected="onEndSeparatorIntersected"
     >
       <template #default="{ messageId, onChangeHeight, onEntryMessageLoaded }">
@@ -43,7 +45,12 @@
         />
       </template>
     </messages-scroller>
-    <message-input :channel-id="channelId" :typing-users="typingUsers" />
+    <message-input
+      :channel-id="channelId"
+      :typing-users="typingUsers"
+      :show-to-new-message-button="showToNewMessageButton"
+      @click-to-new-message-button="toNewMessage"
+    />
   </div>
 </template>
 
@@ -61,6 +68,10 @@ import { useMessagesStore } from '/@/store/entities/messages'
 import useDayDiffMessages from './composables/useDayDiffMessages'
 import { getFullDayString } from '/@/lib/basic/date'
 import type { Pin } from '@traptitech/traq'
+import { useRouter } from 'vue-router'
+import { constructChannelPath } from '/@/router'
+import useChannelPath from '/@/composables/useChannelPath'
+import { useSubscriptionStore } from '/@/store/domain/subscription'
 import ShownMessageDate from './ShownMessageDate.vue'
 
 const props = defineProps<{
@@ -69,6 +80,8 @@ const props = defineProps<{
   pinnedMessages: Pin[]
   typingUsers: UserId[]
 }>()
+
+const router = useRouter()
 
 const scrollerEle = shallowRef<{ $el: HTMLDivElement } | undefined>()
 const {
@@ -110,6 +123,34 @@ const isArchived = computed(
 const messagePinnedUserMap = computed(
   () => new Map(props.pinnedMessages.map(pin => [pin.message.id, pin.userId]))
 )
+
+const { unreadChannelsMap } = useSubscriptionStore()
+const resetIsReachedLatest = () => {
+  if (!unreadChannelsMap.value.get(props.channelId)) return
+  isReachedLatest.value = false
+}
+
+const showToNewMessageButton = ref(false)
+const { channelIdToPathString } = useChannelPath()
+const toNewMessage = () => {
+  if (props.entryMessageId) {
+    const channelPath = channelIdToPathString(props.channelId)
+    router.replace(constructChannelPath(channelPath))
+  }
+  if (scrollerEle.value === undefined) return
+  scrollerEle.value.$el.scrollTo({
+    top: scrollerEle.value.$el.scrollHeight
+  })
+}
+
+const handleScroll = () => {
+  if (scrollerEle.value === undefined || isLoading.value) return
+  const { scrollTop, scrollHeight, clientHeight } = scrollerEle.value.$el
+  showToNewMessageButton.value = scrollHeight - 2 * clientHeight > scrollTop
+  if (!isReachedLatest.value) {
+    showToNewMessageButton.value = true
+  }
+}
 
 const containerRef = ref<HTMLDivElement | null>(null)
 const shownMessageDateValue = ref<string | undefined>()

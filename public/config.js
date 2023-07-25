@@ -48,9 +48,9 @@
         appLink: 'https://git.trap.jp/'
       },
       {
-        label: 'Showcase',
-        iconPath: 'showcase.svg',
-        appLink: 'https://showcase.trapti.tech/'
+        label: 'NeoShowcase',
+        iconPath: 'neoshowcase.svg',
+        appLink: 'https://ns.trap.jp/'
       },
       {
         label: 'HackMD',
@@ -95,10 +95,11 @@
       'git.trapti.tech',
       'md.trapti.tech',
       'drive.trapti.tech',
-      'showcase.trapti.tech',
-      'jomon.trap.jp'
+      'jomon.trap.jp',
+      'ns.trap.jp'
     ],
     wikiPageOrigin: 'https://wiki.trap.jp',
+    blogPagePrefix: 'https://trap.jp/author/',
     auth: {
       resetLink: 'https://portal.trap.jp/reset-password',
       changeLink: 'https://portal.trap.jp',
@@ -108,7 +109,8 @@
     showQrCodeButton: true,
     tooLargeFileMessage: '大きい%sの共有にはDriveを使用してください',
     showWidgetCopyButton: true,
-    inlineReplyDisableChannels: ['#general', '#random']
+    inlineReplyDisableChannels: ['#general', '#random'],
+    iosPwaInfoLink: 'https://wiki.trap.jp/SysAd/docs/traQ-S/PWA'
   }
 
   self.traQConfig = config

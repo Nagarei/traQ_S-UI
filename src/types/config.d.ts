@@ -60,6 +60,11 @@ export type Config = Readonly<{
    */
   wikiPageOrigin?: string
   /**
+   * ブログの投稿者ページへのリンク
+   * undefinedにするとリンクが表示されない
+   */
+  blogPagePrefix?: string
+  /**
    * 外部認証が有効の場合の設定
    * 省略時は各種リンクが表示されない
    */
@@ -106,6 +111,12 @@ export type Config = Readonly<{
    * @example ['#general', '#random']
    */
   inlineReplyDisableChannels?: string[]
+
+  /**
+   * iOSアプリの廃止告知バナーに載せるPWAについてのリンク
+   * 省略時はリンクへの誘導テキストが載らない
+   */
+  iosPwaInfoLink?: string
 }>
 
 declare global {

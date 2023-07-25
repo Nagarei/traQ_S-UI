@@ -74,12 +74,14 @@ import {
   mdiImageMultiple,
   mdiArrowLeft,
   mdiArrowRight,
+  mdiArrowDown,
   mdiMusicNote,
   mdiStop,
   mdiCrown,
   mdiFormatTitle,
   mdiCloseCircle,
-  mdiChevronDown
+  mdiChevronDown,
+  mdiNotebook
 } from '@mdi/js'
 
 interface MdiIconsMapping {
@@ -111,6 +113,7 @@ const mdi: MdiIconsMapping = {
   'plus-circle-outline': mdiPlusCircleOutline,
   'dots-horizontal': mdiDotsHorizontal,
   book: mdiBook,
+  notebook: mdiNotebook,
   twitter: mdiTwitter,
   tag: mdiTag,
   tags: mdiTagMultiple,
@@ -164,6 +167,7 @@ const mdi: MdiIconsMapping = {
   'image-multiple': mdiImageMultiple,
   'arrow-left': mdiArrowLeft,
   'arrow-right': mdiArrowRight,
+  'arrow-down': mdiArrowDown,
   'music-note': mdiMusicNote,
   stop: mdiStop,
   crown: mdiCrown,
