@@ -66,7 +66,7 @@ import MessageElement from '/@/components/Main/MainView/MessageElement/MessageEl
 import MessagesScrollerSeparator from '/@/components/Main/MainView/MessagesScroller/MessagesScrollerSeparator.vue'
 import { useMessagesStore } from '/@/store/entities/messages'
 import useDayDiffMessages from './composables/useDayDiffMessages'
-import { getFullDayString } from '/@/lib/basic/date'
+import { getFullDayStringWithGuide } from '/@/lib/basic/date'
 import type { Pin } from '@traptitech/traq'
 import { useRouter } from 'vue-router'
 import { constructChannelPath } from '/@/router'
@@ -113,17 +113,7 @@ const createdDate = (id: MessageId) => {
     return ''
   }
   
-  const messageDate = new Date(message.createdAt)
-  const messageDateString = getFullDayString(messageDate)
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  if (messageDateString === getFullDayString(today)) {
-    return "今日 (" + messageDateString + ")"
-  } else if (messageDateString === getFullDayString(yesterday)) {
-    return "昨日 (" + messageDateString + ")"
-  }
-  return messageDateString
+  return getFullDayStringWithGuide(new Date(message.createdAt))
 }
 
 const { channelsMap } = useChannelsStore()
@@ -165,7 +155,7 @@ const handleScroll = () => {
 const containerRef = ref<HTMLDivElement | null>(null)
 const shownMessageDateValue = ref<string | undefined>()
 const onMessageIntersected = (createdAt: string) => {
-  shownMessageDateValue.value = getFullDayString(new Date(createdAt))
+  shownMessageDateValue.value = getFullDayStringWithGuide(new Date(createdAt))
 }
 const onEndSeparatorIntersected = () => {
   if (shownMessageDateValue.value === undefined) return
