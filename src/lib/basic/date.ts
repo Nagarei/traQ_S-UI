@@ -22,9 +22,9 @@ export const getFullDayStringWithGuide = (date: Readonly<Date>) => {
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
   if (messageDateString === getFullDayString(today)) {
-    return "今日 (" + messageDateString + ")"
+    return "今日(" + getDayString(date) + ")"
   } else if (messageDateString === getFullDayString(yesterday)) {
-    return "昨日 (" + messageDateString + ")"
+    return "昨日(" + getDayString(date) + ")"
   }
   return messageDateString
 }
