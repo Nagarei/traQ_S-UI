@@ -200,7 +200,6 @@ const onEndSeparatorIntersected = () => {
   margin: 0 auto;
   padding: 4px 8px;
   width: 160px;
-  background-color: white;
   border-radius: 24px;
   text-align: center;
   font-weight: bold;

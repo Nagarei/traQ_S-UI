@@ -110,7 +110,7 @@ const {
   position: relative;
 }
 .button {
-  background-color: white;
+  background-color: $theme-background-primary-default;
   border-radius: 24px;
   padding: 4px 16px;
   text-align: center;
