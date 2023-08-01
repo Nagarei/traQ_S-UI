@@ -299,7 +299,8 @@ onUnmounted(() => {
 .viewport {
   display: flex;
   flex-flow: column;
-  min-height: 100%;
+  // NOTE: bottomSpacer 分だけ除く
+  min-height: calc(100% - 12px);
 }
 
 .element {
