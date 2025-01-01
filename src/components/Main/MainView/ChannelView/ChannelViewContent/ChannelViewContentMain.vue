@@ -17,7 +17,7 @@
       :container-ref="containerRef"
       @request-load-former="onLoadFormerMessagesRequest"
       @request-load-latter="onLoadLatterMessagesRequest"
-      @scroll.passive="handleScroll"
+      @scroll-passive="handleScroll"
       @reset-is-reached-latest="resetIsReachedLatest"
       @end-separator-intersected="onEndSeparatorIntersected"
     >

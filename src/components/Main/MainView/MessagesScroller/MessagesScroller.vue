@@ -2,7 +2,12 @@
   <div
     ref="rootRef"
     :class="$style.root"
-    @scroll.passive="handleScroll"
+    @scroll.passive="
+      () => {
+        handleScroll()
+        emit('scrollPassive')
+      }
+    "
     @click="onClick"
   >
     <div
@@ -149,6 +154,7 @@ const emit = defineEmits<{
   (e: 'requestLoadLatter'): void
   (e: 'endSeparatorIntersected'): void
   (e: 'resetIsReachedLatest'): void
+  (e: 'scrollPassive'): void
 }>()
 
 const { lastScrollPosition } = useMainViewStore()
