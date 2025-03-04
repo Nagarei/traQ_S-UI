@@ -24,18 +24,24 @@ import {
   mdiEmail,
   mdiTag,
   mdiPlus,
+  mdiPlusCircle,
   mdiMagnify,
   mdiHistory,
   mdiDownload,
   mdiEmoticonOutline,
   mdiCog,
   mdiAccount,
+  mdiAccountMultiple,
+  mdiAccountMinus,
   mdiCogs,
   mdiBrightness6,
   mdiPencilOutline,
   mdiToggleSwitchOff,
   mdiToggleSwitch,
   mdiChevronDoubleLeft,
+  mdiChevronDoubleUp,
+  mdiChevronDoubleDown,
+  mdiChevronDown,
   mdiChevronLeft,
   mdiChevronRight,
   mdiBookmark,
@@ -81,7 +87,11 @@ import {
   mdiCloseCircle,
   mdiChevronDown,
   mdiNotebook,
-  mdiDelete
+  mdiDelete,
+  mdiVideo,
+  mdiVideoOff,
+  mdiCommentTextMultipleOutline,
+  mdiCommentOffOutline
 } from '@mdi/js'
 
 interface MdiIconsMapping {
@@ -118,10 +128,13 @@ const mdi: MdiIconsMapping = {
   tags: mdiTagMultiple,
   email: mdiEmail,
   plus: mdiPlus,
+  'plus-circle': mdiPlusCircle,
   download: mdiDownload,
   'emoticon-outline': mdiEmoticonOutline,
   cog: mdiCog,
   account: mdiAccount,
+  'account-multiple': mdiAccountMultiple,
+  'account-minus': mdiAccountMinus,
   cogs: mdiCogs,
   'brightness-6': mdiBrightness6,
   pencil: mdiPencil,
@@ -129,6 +142,9 @@ const mdi: MdiIconsMapping = {
   'toggle-switch-off': mdiToggleSwitchOff,
   'toggle-switch-on': mdiToggleSwitch,
   'chevron-double': mdiChevronDoubleLeft,
+  'chevron-double-up': mdiChevronDoubleUp,
+  'chevron-double-down': mdiChevronDoubleDown,
+  'chevron-down': mdiChevronDown,
   'chevron-left': mdiChevronLeft,
   'chevron-right': mdiChevronRight,
   'chevron-up': mdiChevronUp,
@@ -171,7 +187,11 @@ const mdi: MdiIconsMapping = {
   stop: mdiStop,
   crown: mdiCrown,
   'format-title': mdiFormatTitle,
-  delete: mdiDelete
+  delete: mdiDelete,
+  video: mdiVideo,
+  'video-off': mdiVideoOff,
+  'comment-outline': mdiCommentTextMultipleOutline,
+  'comment-off-outline': mdiCommentOffOutline
 }
 
 export default mdi
