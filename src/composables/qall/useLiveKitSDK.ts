@@ -1,39 +1,40 @@
 import {
-  Track,
-  RoomEvent,
-  AudioPresets,
-  createLocalScreenTracks,
-  Room,
-  LocalVideoTrack,
-  LocalAudioTrack
-} from 'livekit-client'
-import type {
-  RemoteTrack,
-  RemoteTrackPublication,
-  RemoteParticipant,
-  LocalTrackPublication,
-  LocalParticipant,
-  Participant,
-  LocalTrack
-} from 'livekit-client'
-import { computed, ref, type Ref } from 'vue'
-import { useToastStore } from '/@/store/ui/toast'
-import apis from '/@/lib/apis'
-import { VirtualBackgroundProcessor } from '@shiguredo/virtual-background'
-import mitt from 'mitt'
-import rnnoiseWorkletPath from '@sapphi-red/web-noise-suppressor/rnnoiseWorklet.js?url'
-import rnnoiseWasmPath from '@sapphi-red/web-noise-suppressor/rnnoise.wasm?url'
-import rnnoiseSimdWasmPath from '@sapphi-red/web-noise-suppressor/rnnoise_simd.wasm?url'
-import {
   loadRnnoise as loadRnnoiseLib,
   loadSpeex as loadSpeexLib,
   RnnoiseWorkletNode,
   SpeexWorkletNode
 } from '@sapphi-red/web-noise-suppressor'
+import rnnoiseWasmPath from '@sapphi-red/web-noise-suppressor/rnnoise.wasm?url'
+import rnnoiseSimdWasmPath from '@sapphi-red/web-noise-suppressor/rnnoise_simd.wasm?url'
+import rnnoiseWorkletPath from '@sapphi-red/web-noise-suppressor/rnnoiseWorklet.js?url'
 import speexWasmPath from '@sapphi-red/web-noise-suppressor/speex.wasm?url'
 import speexWorkletPath from '@sapphi-red/web-noise-suppressor/speexWorklet.js?url'
-
-type NoiseSuppressionType = 'rnnoise' | 'speex' | 'none'
+import { VirtualBackgroundProcessor } from '@shiguredo/virtual-background'
+import type {
+  LocalParticipant,
+  LocalTrack,
+  LocalTrackPublication,
+  Participant,
+  RemoteParticipant,
+  RemoteTrack,
+  RemoteTrackPublication
+} from 'livekit-client'
+import {
+  AudioPresets,
+  createLocalScreenTracks,
+  LocalAudioTrack,
+  LocalVideoTrack,
+  Room,
+  RoomEvent,
+  Track
+} from 'livekit-client'
+import mitt from 'mitt'
+import { computed, ref, type Ref } from 'vue'
+import apis from '/@/lib/apis'
+import AudioStreamMixer from '/@/lib/webrtc/AudioStreamMixer'
+import ExtendedAudioContext from '/@/lib/webrtc/ExtendedAudioContext'
+import { useRtcSettings } from '/@/store/app/rtcSettings'
+import { useToastStore } from '/@/store/ui/toast'
 
 let speexWasmBinary: ArrayBuffer | undefined
 const loadSpeexWasmBinary = async () => {
@@ -51,9 +52,6 @@ const loadRnnoiseWasmBinary = async () => {
   })
   return rnnoiseWasmBinary
 }
-import ExtendedAudioContext from '/@/lib/webrtc/ExtendedAudioContext'
-import AudioStreamMixer from '/@/lib/webrtc/AudioStreamMixer'
-import { useRtcSettings } from '/@/store/app/rtcSettings'
 
 const virtualBackgroundAssetsPath =
   'https://cdn.jsdelivr.net/npm/@shiguredo/virtual-background@latest/dist'
@@ -86,7 +84,7 @@ type CameraProcessor = {
 const room = ref<Room>()
 const audioContext = ref<AudioContext>()
 const isRnnoiseSupported = computed(() => !!audioContext.value)
-const speakerIdentitys = ref<{ identity: string; name?: string }[]>([])
+const speakerIdentities = ref<{ identity: string; name?: string }[]>([])
 const tracksMap: Ref<Map<string, TrackInfo>> = ref(new Map())
 const cameraProcessorMap: Ref<Map<string, CameraProcessor>> = ref(new Map())
 const screenShareTrackSidMap = ref<Map<string, string>>(new Map())
@@ -142,7 +140,7 @@ function handleLocalTrackPublished(
 
 function handleActiveSpeakerChange(speakers: Participant[]) {
   // show UI indicators when participant is speaking
-  speakerIdentitys.value = speakers
+  speakerIdentities.value = speakers
 }
 
 function handleDisconnect() {
@@ -176,27 +174,13 @@ function handleParticipantDisconnected(participant: Participant) {
 
 const joinRoom = async (roomName: string, isWebinar: boolean = false) => {
   try {
-    const traQtoken = (await apis.getMyQRCode(true)).data
-    const res = await fetch(
-      `https://qall-microservice-for-livekit.trap.show/api/token?room=${roomName}&isWebinar=${isWebinar}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${traQtoken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    )
-    const json = await res.json()
-    const token = json.token
+    const endpoint = (await apis.getQallEndpoints()).data.endpoint
+    const token = (await apis.getLiveKitToken(roomName, isWebinar)).data.token
 
     // pre-warm connection, this can be called as early as your page is loaded
     //room.prepareConnection("https://livekit-test.trap.show:39357", token);
     room.value = new Room({ dynacast: true, adaptiveStream: true })
-    await room.value.prepareConnection(
-      'wss://livekit.qall-dev.trapti.tech',
-      token
-    )
+    await room.value.prepareConnection(endpoint, token)
 
     // set up event listeners
     room.value
@@ -215,7 +199,7 @@ const joinRoom = async (roomName: string, isWebinar: boolean = false) => {
       .on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected)
 
     // connect to room
-    await room.value.connect('wss://livekit.qall-dev.trapti.tech', token)
+    await room.value.connect(endpoint, token)
 
     if (room.value.localParticipant?.permissions?.canPublish) {
       await addMicTrack()
@@ -643,7 +627,7 @@ export const useLiveKitSDK = () => {
     tracksMap,
     screenShareTrackSidMap,
     screenShareTracks,
-    speakerIdentitys,
+    speakerIdentities,
     isMicOn,
     qallMitt
   }

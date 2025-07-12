@@ -18,6 +18,7 @@ import type { UserId } from '/@/types/entity-ids'
 withDefaults(
   defineProps<{
     viewerIds?: readonly UserId[]
+    inactiveViewerIds?: readonly UserId[]
   }>(),
   {
     viewerIds: () => []
