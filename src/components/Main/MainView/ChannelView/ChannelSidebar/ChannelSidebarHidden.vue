@@ -7,16 +7,6 @@
       :size="28"
       @click="emit('open')"
     />
-    <user-icon-ellipsis-list
-      direction="col"
-      transition="fade-bottom"
-      count-clickable
-      show-count
-      :user-ids="viewerIds"
-      :inactive-user-ids="inactiveViewerIds"
-      :class="$style.rest"
-      @count-click="emit('openViewers')"
-    />
   </div>
 </template>
 

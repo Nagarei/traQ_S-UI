@@ -1,6 +1,11 @@
 <template>
-  <div :class="$style.container">
+  <div ref="containerRef" :class="$style.container">
     <scroll-loading-bar :class="$style.loadingBar" :show="isLoading" />
+    <shown-message-date
+      v-if="shownMessageDateValue"
+      :shown-message-date="shownMessageDateValue"
+      :channel-id="channelId"
+    />
     <messages-scroller
       ref="scrollerEle"
       :message-ids="messageIds"
@@ -9,10 +14,12 @@
       :is-loading="isLoading"
       :entry-message-id="entryMessageId"
       :last-loading-direction="lastLoadingDirection"
+      :container-ref="containerRef"
       @request-load-former="onLoadFormerMessagesRequest"
       @request-load-latter="onLoadLatterMessagesRequest"
       @scroll-passive="handleScroll"
       @reset-is-reached-latest="resetIsReachedLatest"
+      @end-separator-intersected="onEndSeparatorIntersected"
     >
       <template #default="{ messageId, onChangeHeight, onEntryMessageLoaded }">
         <messages-scroller-separator
@@ -31,8 +38,10 @@
           :is-archived="isArchived"
           :is-entry-message="messageId === entryMessageId"
           :pinned-user-id="messagePinnedUserMap.get(messageId)"
+          :container-ref="containerRef"
           @change-height="onChangeHeight"
           @entry-message-loaded="onEntryMessageLoaded"
+          @intersected="onMessageIntersected"
         />
       </template>
     </messages-scroller>
@@ -57,12 +66,13 @@ import MessagesScroller from '/@/components/Main/MainView/MessagesScroller/Messa
 import MessagesScrollerSeparator from '/@/components/Main/MainView/MessagesScroller/MessagesScrollerSeparator.vue'
 import ScrollLoadingBar from '/@/components/Main/MainView/ScrollLoadingBar.vue'
 import useChannelPath from '/@/composables/useChannelPath'
-import { getFullDayString } from '/@/lib/basic/date'
+import { getFullDayStringWithGuide } from '/@/lib/basic/date'
 import { constructChannelPath, constructUserPath } from '/@/router'
 import { useSubscriptionStore } from '/@/store/domain/subscription'
 import { useChannelsStore } from '/@/store/entities/channels'
 import { useMessagesStore } from '/@/store/entities/messages'
 import type { ChannelId, MessageId, UserId } from '/@/types/entity-ids'
+import ShownMessageDate from './ShownMessageDate.vue'
 
 const props = defineProps<{
   channelId: ChannelId
@@ -102,8 +112,8 @@ const createdDate = (id: MessageId) => {
   if (!message) {
     return ''
   }
-
-  return getFullDayString(new Date(message.createdAt))
+  
+  return getFullDayStringWithGuide(new Date(message.createdAt))
 }
 
 const { channelsMap, dmChannelsMap } = useChannelsStore()
@@ -146,6 +156,16 @@ const handleScroll = () => {
     showToNewMessageButton.value = true
   }
 }
+
+const containerRef = ref<HTMLDivElement | null>(null)
+const shownMessageDateValue = ref<string | undefined>()
+const onMessageIntersected = (createdAt: string) => {
+  shownMessageDateValue.value = getFullDayStringWithGuide(new Date(createdAt))
+}
+const onEndSeparatorIntersected = () => {
+  if (shownMessageDateValue.value === undefined) return
+  shownMessageDateValue.value = undefined
+}
 </script>
 
 <style lang="scss" module>
@@ -177,5 +197,19 @@ const handleScroll = () => {
 .element {
   margin: 4px 0;
   contain: content;
+}
+
+.shownMessageDate {
+  position: absolute;
+  inset: 12px 0 auto;
+  margin: 0 auto;
+  padding: 4px 8px;
+  width: 160px;
+  border-radius: 24px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid $theme-ui-tertiary-default;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  z-index: $z-index-shown-message-date;
 }
 </style>
