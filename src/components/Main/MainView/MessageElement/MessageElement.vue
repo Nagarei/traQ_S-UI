@@ -39,8 +39,6 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, shallowRef, toRef } from 'vue'
-import type { MessageId, UserId } from '/@/types/entity-ids'
-import { useResponsiveStore } from '/@/store/ui/responsive'
 import type { ChangeHeightData } from './composables/useElementRenderObserver'
 import useElementRenderObserver from './composables/useElementRenderObserver'
 import MessageContents from './MessageContents.vue'
