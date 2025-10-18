@@ -6,8 +6,8 @@
   >
     <!-- チャンネル表示本体 -->
     <div :class="$style.channelContainer">
-      <channel-element-icon
-        :class="$style.channelHash"
+      <ChannelElementIcon
+        :class="$style.channelIcon"
         :has-child="hasChildren"
         :is-selected="isSelected"
         :is-opened="isOpened"
@@ -15,15 +15,14 @@
         :has-notification-on-child="notificationState.hasNotificationOnChild"
         :is-inactive="!channel.active"
         :icon-name="iconName"
-        @mousedown.stop="onChannelHashClick"
-        @keydown.enter="onChannelHashKeydownEnter"
-        @mouseenter="onHashHovered"
-        @mouseleave="onHashHoveredLeave"
+        @click.stop="onClickIcon"
+        @mouseenter="onIconHovered"
+        @mouseleave="onIconHoveredLeave"
       />
       <router-link
         v-slot="{ href, navigate }"
         custom
-        :to="channelIdToLink(props.channel.id)"
+        :to="channelIdToLink(props.channel.id) ?? ''"
       >
         <a
           :class="$style.channel"
@@ -31,7 +30,9 @@
           :aria-current="isSelected && 'page'"
           :aria-expanded="hasChildren && isOpened ? true : undefined"
           :data-is-inactive="$boolAttr(!channel.active)"
-          :aria-label="showShortenedPath ? pathTooltip : pathToShow"
+          :aria-label="
+            showShortenedPath ? pathTooltip : (pathToShow ?? undefined)
+          "
           draggable="false"
           @click="navigate"
           @mouseenter="onMouseEnter"
@@ -39,12 +40,12 @@
           @focus="onFocus"
           @blur="onBlur"
         >
-          <channel-element-name
+          <ChannelElementName
             :channel="channel"
             :show-shortened-path="showShortenedPath"
             :is-selected="isSelected"
           />
-          <channel-element-unread-badge
+          <ChannelElementUnreadBadge
             :is-noticeable="notificationState.isNoticeable"
             :unread-count="notificationState.unreadCount"
           />
@@ -113,23 +114,21 @@ const isSelected = computed(
     props.channel.id === primaryView.value.channelId
 )
 
-const onChannelHashKeydownEnter = () => {
-  if (hasChildren.value) {
-    emit('clickHash', props.channel.id)
-  }
-}
-const onChannelHashClick = (e: MouseEvent) => {
-  if (hasChildren.value && e.button === LEFT_CLICK_BUTTON) {
-    emit('clickHash', props.channel.id)
-  } else {
+const onClickIcon = (e: KeyboardEvent | MouseEvent) => {
+  if (
+    e instanceof MouseEvent &&
+    (!hasChildren.value || e.button !== LEFT_CLICK_BUTTON)
+  ) {
     openChannel(e)
+    return
   }
+  emit('clickHash', props.channel.id)
 }
 
 const { openLink } = useOpenLink()
 const { channelIdToLink } = useChannelPath()
 const openChannel = (event: MouseEvent) => {
-  openLink(event, channelIdToLink(props.channel.id))
+  openLink(event, channelIdToLink(props.channel.id) as string)
 }
 
 const { pathToShow, pathTooltip } = usePath(props as TypedProps)
@@ -139,31 +138,31 @@ const notificationState = useNotificationState(toRef(props, 'channel'))
 const { isHovered, onMouseEnter, onMouseLeave } = useHover()
 const { isFocused, onFocus, onBlur } = useFocus()
 const {
-  isHovered: isHashHovered,
-  onMouseEnter: onHashMouseEnter,
-  onMouseLeave: onHashMouseLeave
+  isHovered: isIconHovered,
+  onMouseEnter: onIconMouseEnter,
+  onMouseLeave: onIconMouseLeave
 } = useHover()
-const onHashHovered = () => {
-  onHashMouseEnter()
+const onIconHovered = () => {
+  onIconMouseEnter()
   onMouseEnter()
 }
-const onHashHoveredLeave = () => {
-  onHashMouseLeave()
+const onIconHoveredLeave = () => {
+  onIconMouseLeave()
   onMouseLeave()
 }
 const isChannelBgHovered = computed(
-  () => isHovered.value && !(hasChildren.value && isHashHovered.value)
+  () => isHovered.value && !(hasChildren.value && isIconHovered.value)
 )
 
 const iconName = computed(() => {
-  if (props.showStar && notificationState.isStarred) {
-    return 'star-outline'
-  }
   if (
     props.showNotified &&
     notificationState.subscriptionLevel === ChannelSubscribeLevel.notified
   ) {
     return 'notified'
+  }
+  if (props.showStar && notificationState.isStarred) {
+    return 'star-outline'
   }
   return 'hash'
 })
@@ -208,7 +207,7 @@ $bgLeftShift: 8px;
   margin-left: $bgLeftShift;
   width: calc(100% - $bgLeftShift);
 }
-.channelHash {
+.channelIcon {
   flex-shrink: 0;
   cursor: pointer;
   position: absolute;

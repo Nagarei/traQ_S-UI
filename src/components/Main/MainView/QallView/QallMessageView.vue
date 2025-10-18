@@ -1,15 +1,14 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref, shallowRef } from 'vue'
-import useChannelMessageFetcher from '../ChannelView/ChannelViewContent/composables/useChannelMessageFetcher'
-import MessageElement from '/@/components/Main/MainView/MessageElement/MessageElement.vue'
-import MessageInput from '/@/components/Main/MainView/MessageInput/MessageInput.vue'
 import MessagesScroller from '/@/components/Main/MainView/MessagesScroller/MessagesScroller.vue'
+import MessageInput from '/@/components/Main/MainView/MessageInput/MessageInput.vue'
 import ScrollLoadingBar from '/@/components/Main/MainView/ScrollLoadingBar.vue'
-import IconButton from '/@/components/UI/IconButton.vue'
-import { useSubscriptionStore } from '/@/store/domain/subscription'
-import { useChannelsStore } from '/@/store/entities/channels'
-import { useMessagesStore } from '/@/store/entities/messages'
+import { computed, nextTick, ref, shallowRef } from 'vue'
 import type { ChannelId, UserId } from '/@/types/entity-ids'
+import useChannelMessageFetcher from '../ChannelView/ChannelViewContent/composables/useChannelMessageFetcher'
+import { useChannelsStore } from '/@/store/entities/channels'
+import MessageElement from '/@/components/Main/MainView/MessageElement/MessageElement.vue'
+import { useSubscriptionStore } from '/@/store/domain/subscription'
+import IconButton from '/@/components/UI/IconButton.vue'
 
 const props = defineProps<{
   channelId: ChannelId
@@ -25,19 +24,16 @@ const {
   isReachedLatest,
   isLoading,
   lastLoadingDirection,
-  unreadSince,
   onLoadFormerMessagesRequest,
   onLoadLatterMessagesRequest
 } = useChannelMessageFetcher(scrollerEle, props)
-const { messagesMap } = useMessagesStore()
 
 const { channelsMap } = useChannelsStore()
 const isArchived = computed(
   () => channelsMap.value.get(props.channelId)?.archived ?? false
 )
 
-const { unreadChannelsMap, deleteUnreadChannelWithSend } =
-  useSubscriptionStore()
+const { unreadChannelsMap } = useSubscriptionStore()
 
 const resetIsReachedLatest = () => {
   if (!unreadChannelsMap.value.get(props.channelId)) return
@@ -73,7 +69,7 @@ const handleScroll = () => {
         :class="$style.messageContainer"
         :data-is-not-messages-show="$boolAttr(!isMessageShow)"
       >
-        <scroll-loading-bar
+        <ScrollLoadingBar
           :class="$style.loadingBar"
           :show="isLoading && isMessageShow"
         />
@@ -84,7 +80,7 @@ const handleScroll = () => {
           >
             <div :class="$style.messageContainerBackground" />
 
-            <messages-scroller
+            <MessagesScroller
               v-if="isMessageShow"
               ref="scrollerEle"
               :message-ids="messageIds"
@@ -100,7 +96,7 @@ const handleScroll = () => {
               <template
                 #default="{ messageId, onChangeHeight, onEntryMessageLoaded }"
               >
-                <message-element
+                <MessageElement
                   :class="$style.element"
                   :message-id="messageId"
                   :is-archived="isArchived"
@@ -108,7 +104,7 @@ const handleScroll = () => {
                   @entry-message-loaded="onEntryMessageLoaded"
                 />
               </template>
-            </messages-scroller>
+            </MessagesScroller>
           </div>
         </transition>
         <div :class="[$style.uiElement, $style.uiToggleButton]">
@@ -131,7 +127,7 @@ const handleScroll = () => {
       </div>
       <slot name="default" />
     </div>
-    <message-input
+    <MessageInput
       :channel-id="channelId"
       :typing-users="typingUsers"
       :show-to-new-message-button="false"

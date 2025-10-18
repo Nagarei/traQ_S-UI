@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.container">
     <div :class="$style.input">
-      <filter-input
+      <FilterInput
         v-model="modelValue"
         on-secondary
         disable-ime
@@ -15,14 +15,6 @@
 import FilterInput from '/@/components/UI/FilterInput.vue'
 
 const modelValue = defineModel<string>({ required: true })
-
-defineProps<{
-  isStarred: boolean
-}>()
-
-defineEmits<{
-  (e: 'update:isStarred', v: boolean): void
-}>()
 </script>
 
 <style lang="scss" module>

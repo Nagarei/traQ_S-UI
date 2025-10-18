@@ -1,8 +1,8 @@
 <template>
   <div v-if="subscribers" :class="$style.container">
-    <filter-input v-model="query" />
+    <FilterInput v-model="query" />
     <div :class="$style.list">
-      <user-notification-list-item
+      <UserNotificationListItem
         v-for="entry in subscriptionStateSorted"
         :key="entry.userId"
         :class="$style.item"
@@ -24,12 +24,10 @@ import useChannelSubscribers from '/@/composables/subscription/useChannelSubscri
 import { useToastStore } from '/@/store/ui/toast'
 import useTextFilter from '/@/composables/utils/useTextFilter'
 import { useMeStore } from '/@/store/domain/me'
-import { useUsersStore } from '/@/store/entities/users'
 
 const useChannelNotificationState = (props: { channelId: ChannelId }) => {
   const { myId } = useMeStore()
   const { addErrorToast } = useToastStore()
-  const { activeUsersMap } = useUsersStore()
   const subscribers = useChannelSubscribers(props)
 
   const initialSubscribers = ref(new Set<string>())

@@ -1,12 +1,12 @@
 <template>
   <div ref="containerRef" :class="$style.container">
-    <scroll-loading-bar :class="$style.loadingBar" :show="isLoading" />
+    <ScrollLoadingBar :class="$style.loadingBar" :show="isLoading" />
     <shown-message-date
       v-if="shownMessageDateValue"
       :shown-message-date="shownMessageDateValue"
       :channel-id="channelId"
     />
-    <messages-scroller
+    <MessagesScroller
       ref="scrollerEle"
       :message-ids="messageIds"
       :is-reached-end="isReachedEnd"
@@ -22,17 +22,17 @@
       @end-separator-intersected="onEndSeparatorIntersected"
     >
       <template #default="{ messageId, onChangeHeight, onEntryMessageLoaded }">
-        <messages-scroller-separator
+        <MessagesScrollerSeparator
           v-if="messageId === firstUnreadMessageId"
           title="ここから未読"
           :class="$style.unreadSeparator"
         />
-        <messages-scroller-separator
+        <MessagesScrollerSeparator
           v-if="dayDiffMessages.has(messageId)"
           :title="createdDate(messageId)"
           :class="$style.dateSeparator"
         />
-        <message-element
+        <MessageElement
           :class="$style.element"
           :message-id="messageId"
           :is-archived="isArchived"
@@ -44,8 +44,8 @@
           @intersected="onMessageIntersected"
         />
       </template>
-    </messages-scroller>
-    <message-input
+    </MessagesScroller>
+    <MessageInput
       :channel-id="channelId"
       :typing-users="typingUsers"
       :show-to-new-message-button="showToNewMessageButton"
@@ -92,8 +92,7 @@ const {
   lastLoadingDirection,
   unreadSince,
   onLoadFormerMessagesRequest,
-  onLoadLatterMessagesRequest,
-  onLoadAroundMessagesRequest
+  onLoadLatterMessagesRequest
 } = useChannelMessageFetcher(scrollerEle, props)
 
 const { messagesMap } = useMessagesStore()
@@ -134,7 +133,7 @@ const showToNewMessageButton = ref(false)
 const { channelIdToPathString } = useChannelPath()
 const toNewMessage = () => {
   if (props.entryMessageId) {
-    const channelPath = channelIdToPathString(props.channelId)
+    const channelPath = channelIdToPathString(props.channelId) as string
     if (dmChannelsMap.value.has(props.channelId)) {
       router.replace(constructUserPath(channelPath))
     } else {

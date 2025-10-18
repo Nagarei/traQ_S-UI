@@ -1,11 +1,21 @@
 <template>
   <div :class="$style.container">
-    <a-icon
+    <AIcon
       :class="$style.icon"
       mdi
       name="chevron-double"
       :size="28"
       @click="emit('open')"
+    />
+    <UserIconEllipsisList
+      direction="col"
+      transition="fade-bottom"
+      count-clickable
+      show-count
+      :user-ids="viewerIds"
+      :inactive-user-ids="inactiveViewerIds"
+      :class="$style.rest"
+      @count-click="emit('openViewers')"
     />
   </div>
 </template>

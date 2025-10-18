@@ -15,7 +15,7 @@
       :class="$style.viewport"
       data-testid="channel-viewport"
     >
-      <messages-scroller-separator
+      <MessagesScrollerSeparator
         v-if="isReachedEnd"
         ref="endSeparatorEle"
         title="これ以上メッセージはありません"
@@ -37,7 +37,6 @@
 import { throttle } from 'throttle-debounce'
 import type { Ref } from 'vue'
 import {
-  computed,
   nextTick,
   onMounted,
   onUnmounted,
@@ -115,11 +114,12 @@ const useScrollRestoration = (
   const { lastScrollPosition } = useMainViewStore()
   const route = useRoute()
   watch(
-    computed(() => route.name),
+    () => route.name,
     async (to, from) => {
       if (isMessageScrollerRoute(from)) {
-        lastScrollPosition.value = rootRef.value?.scrollTop ?? 0
+        lastScrollPosition.value = state.scrollTop
       }
+
       if (isMessageScrollerRoute(to)) {
         state.scrollTop = lastScrollPosition.value
         await nextTick()
@@ -220,11 +220,22 @@ watch(
         state.height = newHeight
         return
       }
-      rootRef.value.scrollTo({
-        top: newHeight - state.height
-      })
-    }
-    state.height = newHeight
+      //上に追加された時はスクロール位置を変更する。
+      if (props.lastLoadingDirection === 'former') {
+        rootRef.value.scrollTo({
+          top: newHeight - state.height
+        })
+        state.height = newHeight
+      }
+
+      if (props.lastLoadingDirection === 'latest') {
+        // チャンネルを移動したとき、
+        rootRef.value.scrollTo({
+          top: newHeight
+        })
+        state.height = newHeight
+      }
+    } else state.height = newHeight
   },
   { deep: true, flush: 'post' }
 )
@@ -294,7 +305,7 @@ onUnmounted(() => {
   overflow-y: scroll;
   padding: 12px 0;
   backface-visibility: hidden;
-  contain: strict;
+  contain: var(--contain-strict);
   // overflow-anchorはデフォルトでautoだが、Safariが対応していないので、
   // 手動で調節しているため明示的に無効化する
   overflow-anchor: none;

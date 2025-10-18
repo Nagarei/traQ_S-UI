@@ -49,7 +49,7 @@ const toggleAudio = async () => {
   try {
     toggleMicMute()
     isMicOn.value = !isMicOn.value
-  } catch (err) {}
+  } catch (_) {}
 }
 
 const toggleVideo = async () => {
@@ -103,13 +103,13 @@ const handleSound = () => {
 }
 
 const reactionButton = useTemplateRef<HTMLDivElement>('reactionButton')
-const { openStampPicker, closeStampPicker } = useStampPickerInvoker(
+const { openStampPicker } = useStampPickerInvoker(
   async stampData => {
     try {
       await publishData({ type: 'stamp', message: stampData.id })
       qallMitt.emit('pushStamp', stampData.id)
       openStampPicker()
-    } catch (e) {}
+    } catch (_) {}
   },
   reactionButton,
   false,
@@ -269,7 +269,7 @@ const toggleDanmaku = () => {
                 <ClickOutside @click-outside="showParticipants = false">
                   <div v-if="showParticipants" :class="$style.participantsList">
                     <div :class="$style.participantsContent">
-                      <participant-list
+                      <ParticipantList
                         v-for="participant in filteredParticipants"
                         :key="participant.user.id"
                         :participant="participant.user"
