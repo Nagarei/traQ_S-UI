@@ -38,10 +38,6 @@
 </template>
 
 <script lang="ts" setup>
-import MessageStampList from './MessageStampList.vue'
-import MessagePinned from './MessagePinned.vue'
-import MessageContents from './MessageContents.vue'
-import MessageTools from '/@/components/Main/MainView/MessageElement/MessageTools.vue'
 import { computed, onMounted, onUnmounted, shallowRef, toRef } from 'vue'
 import type { MessageId, UserId } from '/@/types/entity-ids'
 import { useResponsiveStore } from '/@/store/ui/responsive'
