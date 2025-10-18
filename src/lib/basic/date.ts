@@ -19,6 +19,19 @@ export const getISOFullDayString = (date: Readonly<Date>) =>
 
 export const getCurrentTimeString = () => getTimeString(new Date())
 
+export const getFullDayStringWithGuide = (date: Readonly<Date>) => {
+  const messageDateString = getFullDayString(date)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (messageDateString === getFullDayString(today)) {
+    return "今日(" + getDayString(date) + ")"
+  } else if (messageDateString === getFullDayString(yesterday)) {
+    return "昨日(" + getDayString(date) + ")"
+  }
+  return messageDateString
+}
+
 /**
  * 2つの日時を比べ、差異がない部分については省略したものを出力する
  * @param ofDate 出力する日時

@@ -5,7 +5,12 @@
 :80
 
 encode zstd gzip
-header /sw.js Cache-Control "max-age=0"
+header /config.js               Cache-Control "max-age=0"
+header /defaultTheme.js         Cache-Control "max-age=0"
+header /manifest.webmanifest    Cache-Control "max-age=0"
+header /sw.js                   Cache-Control "max-age=0"
+header /assets/*                Cache-Control "max-age=604800"
+header /fonts/*                 Cache-Control "max-age=604800"
 
 file_server {
     precompressed br gzip

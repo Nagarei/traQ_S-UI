@@ -38,7 +38,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, shallowRef, toRef } from 'vue'
+import MessageStampList from './MessageStampList.vue'
+import MessagePinned from './MessagePinned.vue'
+import MessageContents from './MessageContents.vue'
+import MessageTools from '/@/components/Main/MainView/MessageElement/MessageTools.vue'
+import { computed, onMounted, onUnmounted, shallowRef, toRef } from 'vue'
+import type { MessageId, UserId } from '/@/types/entity-ids'
+import { useResponsiveStore } from '/@/store/ui/responsive'
 import type { ChangeHeightData } from './composables/useElementRenderObserver'
 import useElementRenderObserver from './composables/useElementRenderObserver'
 import MessageContents from './MessageContents.vue'
@@ -60,6 +66,7 @@ const props = withDefaults(
     pinnedUserId?: UserId
     isEntryMessage?: boolean
     isArchived?: boolean
+    containerRef?: HTMLDivElement | null
   }>(),
   {
     isEntryMessage: false,
@@ -70,6 +77,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'entryMessageLoaded', _relativePos: number): void
   (e: 'changeHeight', _data: ChangeHeightData): void
+  (e: 'intersected', _createdAt: string): void
 }>()
 
 const bodyRef = shallowRef<HTMLDivElement | null>(null)
@@ -93,6 +101,26 @@ useElementRenderObserver(
 const { isHovered, onPointerEnter, onClick, onMouseLeave, onClickOutside } =
   useMessageToolsHover()
 const showMessageTools = computed(() => isHovered.value && !isEditing.value)
+
+const observer = new IntersectionObserver(
+  entries => {
+    if (entries[0]?.isIntersecting) {
+      if (message.value === undefined) return
+      emit('intersected', message.value.createdAt)
+    }
+  },
+  {
+    root: props.containerRef,
+    rootMargin: '0px 0px -100%'
+  }
+)
+onMounted(() => {
+  if (bodyRef.value === null || props.containerRef === undefined) return
+  observer.observe(bodyRef.value)
+})
+onUnmounted(() => {
+  observer.disconnect()
+})
 </script>
 
 <style lang="scss" module>
