@@ -40,8 +40,8 @@
 </template>
 
 <script lang="ts" setup>
-
 import { computed, onMounted, onUnmounted, ref, shallowRef, toRef } from 'vue'
+
 import type { ChangeHeightData } from './composables/useElementRenderObserver'
 import useElementRenderObserver from './composables/useElementRenderObserver'
 import MessageContents from './MessageContents.vue'
