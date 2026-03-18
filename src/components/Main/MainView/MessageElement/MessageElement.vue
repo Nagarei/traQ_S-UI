@@ -105,7 +105,6 @@ useElementRenderObserver(
 
 const { isHovered, onPointerEnter, onClick, onMouseLeave, onClickOutside } =
   useMessageToolsHover()
-
 const showMessageTools = computed(
   () => (isHovered.value && !isEditing.value) || isActive.value
 )
