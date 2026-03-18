@@ -20,15 +20,16 @@
       :class="$style.editButton"
       icon-name="pencil"
       icon-mdi
-      @click="emit('edit', $event)"
+      @mousedown="emit('edit', $event)"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import AIcon from '/@/components/UI/AIcon.vue'
-import ModalReturnButton from './ModalReturnButton.vue'
 import IconButton from '/@/components/UI/IconButton.vue'
+
+import ModalReturnButton from './ModalReturnButton.vue'
 
 withDefaults(
   defineProps<{

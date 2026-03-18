@@ -15,6 +15,8 @@
         :has-notification-on-child="notificationState.hasNotificationOnChild"
         :is-inactive="!channel.active"
         :icon-name="iconName"
+        :is-icon-mdi="isIconMdi"
+        :icon-size="iconSize"
         @click.stop="onClickIcon"
         @mouseenter="onIconHovered"
         @mouseleave="onIconHoveredLeave"
@@ -68,24 +70,27 @@
 </template>
 
 <script lang="ts" setup>
+import { ChannelSubscribeLevel } from '@traptitech/traq'
+
 import { computed, toRef } from 'vue'
-import type { ChannelTreeNode } from '/@/lib/channelTree'
-import type { ChannelId } from '/@/types/entity-ids'
+
+import {
+  type TypedProps,
+  usePath
+} from '/@/components/Main/NavigationBar/ChannelList/composables/usePath'
+import useFocus from '/@/composables/dom/useFocus'
 import useHover from '/@/composables/dom/useHover'
+import useChannelPath from '/@/composables/useChannelPath'
+import { useOpenLink } from '/@/composables/useOpenLink'
+import type { ChannelTreeNode } from '/@/lib/channelTree'
 import { LEFT_CLICK_BUTTON } from '/@/lib/dom/event'
 import { useMainViewStore } from '/@/store/ui/mainView'
-import ChannelElementIcon from './ChannelElementIcon.vue'
-import ChannelElementUnreadBadge from './ChannelElementUnreadBadge.vue'
-import ChannelElementName from './ChannelElementName.vue'
+import type { ChannelId } from '/@/types/entity-ids'
+
 import useNotificationState from '../composables/useNotificationState'
-import { useOpenLink } from '/@/composables/useOpenLink'
-import useChannelPath from '/@/composables/useChannelPath'
-import useFocus from '/@/composables/dom/useFocus'
-import { ChannelSubscribeLevel } from '@traptitech/traq'
-import {
-  usePath,
-  type TypedProps
-} from '/@/components/Main/NavigationBar/ChannelList/composables/usePath'
+import ChannelElementIcon from './ChannelElementIcon.vue'
+import ChannelElementName from './ChannelElementName.vue'
+import ChannelElementUnreadBadge from './ChannelElementUnreadBadge.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -164,8 +169,13 @@ const iconName = computed(() => {
   if (props.showStar && notificationState.isStarred) {
     return 'star-outline'
   }
+  if (props.channel.archived) {
+    return 'archive'
+  }
   return 'hash'
 })
+const isIconMdi = computed(() => props.channel.archived)
+const iconSize = computed(() => (props.channel.archived ? 17 : undefined))
 </script>
 
 <style lang="scss" module>

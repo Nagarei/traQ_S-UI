@@ -9,10 +9,11 @@
 <script lang="ts" setup>
 import DesktopGroupManager from '/@/components/GroupManager/DesktopGroupManager.vue'
 import MobileGroupManager from '/@/components/GroupManager/MobileGroupManager.vue'
-import useLoginCheck from './composables/useLoginCheck'
-import { useResponsiveStore } from '/@/store/ui/responsive'
+import useResponsive from '/@/composables/useResponsive'
 
-const { isMobile } = useResponsiveStore()
+import useLoginCheck from './composables/useLoginCheck'
+
+const { isMobile } = useResponsive()
 
 // ログイン必要ルート
 const { isLoginCheckDone } = useLoginCheck()

@@ -1,14 +1,19 @@
 <script lang="ts" setup>
-import MessagesScroller from '/@/components/Main/MainView/MessagesScroller/MessagesScroller.vue'
-import MessageInput from '/@/components/Main/MainView/MessageInput/MessageInput.vue'
-import ScrollLoadingBar from '/@/components/Main/MainView/ScrollLoadingBar.vue'
 import { computed, nextTick, ref, shallowRef } from 'vue'
-import type { ChannelId, UserId } from '/@/types/entity-ids'
-import useChannelMessageFetcher from '../ChannelView/ChannelViewContent/composables/useChannelMessageFetcher'
-import { useChannelsStore } from '/@/store/entities/channels'
-import MessageElement from '/@/components/Main/MainView/MessageElement/MessageElement.vue'
-import { useSubscriptionStore } from '/@/store/domain/subscription'
+
+import MessageInput from '/@/components/Main/MainView/MessageInput/MessageInput.vue'
+import MessagesScroller, {
+  type MessageScrollerInstance
+} from '/@/components/Main/MainView/MessagesScroller/MessagesScroller.vue'
+import ScrollLoadingBar from '/@/components/Main/MainView/ScrollLoadingBar.vue'
 import IconButton from '/@/components/UI/IconButton.vue'
+import { unrefElement } from '/@/lib/dom/unrefElement'
+import { useSubscriptionStore } from '/@/store/domain/subscription'
+import { useChannelsStore } from '/@/store/entities/channels'
+import type { ChannelId, UserId } from '/@/types/entity-ids'
+
+import useChannelMessageFetcher from '../ChannelView/ChannelViewContent/composables/useChannelMessageFetcher'
+import MessageElement from '../MessageElement/MessageElement.vue'
 
 const props = defineProps<{
   channelId: ChannelId
@@ -17,7 +22,7 @@ const props = defineProps<{
 
 const isMessageShow = ref(false)
 
-const scrollerEle = shallowRef<{ $el: HTMLDivElement } | undefined>()
+const scrollerRef = shallowRef<MessageScrollerInstance>()
 const {
   messageIds,
   isReachedEnd,
@@ -26,7 +31,7 @@ const {
   lastLoadingDirection,
   onLoadFormerMessagesRequest,
   onLoadLatterMessagesRequest
-} = useChannelMessageFetcher(scrollerEle, props)
+} = useChannelMessageFetcher(scrollerRef, props)
 
 const { channelsMap } = useChannelsStore()
 const isArchived = computed(
@@ -41,17 +46,19 @@ const resetIsReachedLatest = () => {
 
 const showToNewMessageButton = ref(false)
 const toNewMessage = (behavior?: ScrollBehavior) => {
-  if (!scrollerEle.value) return
+  const element = unrefElement(scrollerRef)
+  if (!element) return
   showToNewMessageButton.value = false
-  scrollerEle.value.$el.scrollTo({
-    top: scrollerEle.value.$el.scrollHeight,
+  element.scrollTo({
+    top: element.scrollHeight,
     behavior: behavior
   })
 }
 
 const handleScroll = () => {
-  if (scrollerEle.value === undefined || isLoading.value) return
-  const { scrollTop, scrollHeight, clientHeight } = scrollerEle.value.$el
+  const element = unrefElement(scrollerRef)
+  if (!element || isLoading.value) return
+  const { scrollTop, scrollHeight, clientHeight } = element
   showToNewMessageButton.value = scrollHeight - 2 * clientHeight > scrollTop
   if (!isReachedLatest.value) {
     showToNewMessageButton.value = true
@@ -82,7 +89,7 @@ const handleScroll = () => {
 
             <MessagesScroller
               v-if="isMessageShow"
-              ref="scrollerEle"
+              ref="scrollerRef"
               :message-ids="messageIds"
               :is-reached-end="isReachedEnd"
               :is-reached-latest="isReachedLatest"
@@ -107,23 +114,22 @@ const handleScroll = () => {
             </MessagesScroller>
           </div>
         </transition>
-        <div :class="[$style.uiElement, $style.uiToggleButton]">
-          <IconButton
-            :icon-name="`chevron-double-${isMessageShow ? 'down' : 'up'}`"
-            icon-mdi
-            @click="
-              () => {
-                if (isMessageShow) {
-                  isMessageShow = false
-                  toNewMessage('smooth')
-                } else {
-                  isMessageShow = true
-                  nextTick(() => toNewMessage())
-                }
+        <IconButton
+          :icon-name="`chevron-double-${isMessageShow ? 'down' : 'up'}`"
+          icon-mdi
+          :class="$style.toggleButton"
+          @click="
+            () => {
+              if (isMessageShow) {
+                isMessageShow = false
+                toNewMessage('smooth')
+              } else {
+                isMessageShow = true
+                nextTick(() => toNewMessage())
               }
-            "
-          />
-        </div>
+            }
+          "
+        />
       </div>
       <slot name="default" />
     </div>
@@ -206,13 +212,11 @@ const handleScroll = () => {
   margin: 4px 0;
   contain: content;
 }
-.uiElement {
-  pointer-events: all;
-}
 
-.uiToggleButton {
+.toggleButton {
   @include color-ui-secondary;
   @include background-primary;
+  pointer-events: all;
   padding: 0.5rem;
   border-radius: 2rem;
   position: absolute;

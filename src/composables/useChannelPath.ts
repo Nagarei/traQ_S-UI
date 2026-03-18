@@ -1,13 +1,15 @@
-import type { ChannelId, DMChannelId } from '/@/types/entity-ids'
-import { constructUserPath, constructChannelPath } from '/@/router'
+import { watch } from 'vue'
+
 import type { SimpleChannel } from '/@/lib/channel'
 import { channelIdToSimpleChannelPath as libChannelIdToSimpleChannelPath } from '/@/lib/channel'
-import { channelPathToId } from '/@/lib/channelTree'
-import { useChannelsStore } from '/@/store/entities/channels'
-import { useUsersStore } from '../store/entities/users'
-import { useChannelTree } from '/@/store/domain/channelTree'
+import { channelPathToId as channelPathToIdImpl } from '/@/lib/channelTree'
 import { memoizeWithPurge } from '/@/lib/memoize'
-import { watch } from 'vue'
+import { constructChannelPath, constructUserPath } from '/@/router'
+import { useChannelTree } from '/@/store/domain/channelTree'
+import { useChannelsStore } from '/@/store/entities/channels'
+import type { ChannelId, DMChannelId } from '/@/types/entity-ids'
+
+import { useUsersStore } from '../store/entities/users'
 
 const MAX_SHORT_PATH_LENGTH = 20
 
@@ -15,12 +17,20 @@ const useChannelPath = () => {
   const { channelsMap, dmChannelsMap, bothChannelsMapFetched } =
     useChannelsStore()
   const { usersMap } = useUsersStore()
-  const { topLevelChannels } = useChannelTree()
+  const { channelTree, topLevelChannels } = useChannelTree()
 
   const getUserNameByDMChannelId = (dmChannelId: DMChannelId) => {
     const dmChannel = dmChannelsMap.value.get(dmChannelId)
     if (!dmChannel) return null
     return usersMap.value.get(dmChannel.userId)?.name ?? ''
+  }
+
+  const channelPathToId = (path: string[]) => {
+    return channelPathToIdImpl(path, channelTree.value)
+  }
+
+  const channelPathStringToId = (path: string) => {
+    return channelPathToId(path.split('/'))
   }
 
   const channelIdToSimpleChannelPath = (
@@ -161,11 +171,13 @@ const useChannelPath = () => {
 
     const channelIds = simpleChannels.map(c => c.id)
     const channelNames = simpleChannels.map(c => c.name)
-    const channelInitials = channelNames.map(c => c[0] ?? '')
+    const channelShortenedNames = channelNames.map(name =>
+      name.length <= 2 ? name : (name[0] ?? '')
+    )
 
     // r/g/p/child
     const primitiveChannels = [
-      ...channelInitials.slice(0, -1),
+      ...channelShortenedNames.slice(0, -1),
       channelNames[channelsLength - 1] ?? ''
     ]
     if (primitiveChannels.join('/').length >= MAX_SHORT_PATH_LENGTH) {
@@ -230,7 +242,7 @@ const useChannelPath = () => {
         replaceInitialChannels.join('/').length > MAX_SHORT_PATH_LENGTH &&
         replaceInitialIndex < channelsLength - 2
       ) {
-        const indexinitial = channelInitials[replaceInitialIndex]
+        const indexinitial = channelShortenedNames[replaceInitialIndex]
         if (indexinitial !== undefined) {
           replaceInitialChannels[replaceInitialIndex] = indexinitial
         }
@@ -276,6 +288,7 @@ const useChannelPath = () => {
 
   return {
     channelPathToId,
+    channelPathStringToId,
     channelIdToPath,
     channelIdToSimpleChannelPath,
     channelIdToPathString,

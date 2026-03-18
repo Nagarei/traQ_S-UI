@@ -8,6 +8,7 @@
       :data-is-pinned="$boolAttr(message.pinned)"
       :data-is-entry="$boolAttr(isEntryMessage)"
       :data-is-editing="$boolAttr(isEditing)"
+      :data-is-active="$boolAttr(isActive)"
       @pointerenter="onPointerEnter"
       @click="onClick"
       @mouseleave="onMouseLeave"
@@ -18,6 +19,7 @@
         :class="$style.pinned"
       />
       <MessageTools
+        v-model:is-active="isActive"
         :show="showMessageTools"
         :class="$style.tools"
         :message-id="messageId"
@@ -38,7 +40,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, shallowRef, toRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef, toRef } from 'vue'
+
 import type { ChangeHeightData } from './composables/useElementRenderObserver'
 import useElementRenderObserver from './composables/useElementRenderObserver'
 import MessageContents from './MessageContents.vue'
@@ -49,10 +52,16 @@ import MessageTools, {
 } from '/@/components/Main/MainView/MessageElement/MessageTools.vue'
 import ClickOutside from '/@/components/UI/ClickOutside'
 import useEmbeddings from '/@/composables/message/useEmbeddings'
+import useResponsive from '/@/composables/useResponsive'
 import { useMessagesStore } from '/@/store/entities/messages'
 import { useMessageEditingStateStore } from '/@/store/ui/messageEditingStateStore'
-import { useResponsiveStore } from '/@/store/ui/responsive'
 import type { MessageId, UserId } from '/@/types/entity-ids'
+
+import MessageContents from './MessageContents.vue'
+import MessagePinned from './MessagePinned.vue'
+import MessageStampList from './MessageStampList.vue'
+import type { ChangeHeightData } from './composables/useElementRenderObserver'
+import useElementRenderObserver from './composables/useElementRenderObserver'
 
 const props = withDefaults(
   defineProps<{
@@ -74,8 +83,10 @@ const emit = defineEmits<{
   (e: 'intersected', _createdAt: string): void
 }>()
 
+const isActive = ref(false)
+
 const bodyRef = shallowRef<HTMLDivElement | null>(null)
-const { isMobile } = useResponsiveStore()
+const { isMobile } = useResponsive()
 const { messagesMap } = useMessagesStore()
 const message = computed(() => messagesMap.value.get(props.messageId))
 
@@ -94,7 +105,9 @@ useElementRenderObserver(
 
 const { isHovered, onPointerEnter, onClick, onMouseLeave, onClickOutside } =
   useMessageToolsHover()
-const showMessageTools = computed(() => isHovered.value && !isEditing.value)
+const showMessageTools = computed(
+  () => (isHovered.value && !isEditing.value) || isActive.value
+)
 
 const observer = new IntersectionObserver(
   entries => {
@@ -138,8 +151,11 @@ $messagePaddingMobile: 16px;
     // TODO: 色を正しくする
     background: $common-background-pin;
   }
-  &:not([data-is-editing]):not([data-is-pinned]):not([data-is-entry]):hover {
-    background: var(--specific-message-hover-background);
+  &:not([data-is-editing]):not([data-is-pinned]):not([data-is-entry]) {
+    &[data-is-active],
+    &:hover {
+      background: var(--specific-message-hover-background);
+    }
   }
 }
 

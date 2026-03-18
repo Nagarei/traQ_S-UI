@@ -29,25 +29,26 @@
       :width="suggesterWidth"
       :position="suggesterPosition"
       :candidates="suggestedCandidates"
-      :selected-index="selectedCandidateIndex"
-      :confirmed-part="confirmedPart"
+      :selected-index="selectedIndex"
       @select="onSelect"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import usePaste from './composables/usePaste'
-import useSendKeyWatcher from './composables/useSendKeyWatcher'
-import useSuggester from './composables/suggestion/useSuggester'
-import DropdownSuggester from './DropdownSuggester/DropdownSuggester.vue'
+import { computed, nextTick, shallowRef, watch } from 'vue'
+
 import TextareaAutosize from '/@/components/UI/TextareaAutosize.vue'
 import useInsertText from '/@/composables/dom/useInsertText'
+import useResponsive from '/@/composables/useResponsive'
 import { isFirefox } from '/@/lib/dom/browser'
 import { getScrollbarWidth } from '/@/lib/dom/scrollbar'
-import { useResponsiveStore } from '/@/store/ui/responsive'
 import type { ChannelId } from '/@/types/entity-ids'
+
+import DropdownSuggester from './DropdownSuggester/DropdownSuggester.vue'
+import useSuggester from './composables/suggestion/useSuggester'
+import usePaste from './composables/usePaste'
+import useSendKeyWatcher from './composables/useSendKeyWatcher'
 
 const modelValue = defineModel<string>({ default: '' })
 const showTextAreaExpandButton = defineModel<boolean>(
@@ -88,12 +89,14 @@ const emit = defineEmits<{
 
 const firefoxFlag = isFirefox()
 
-const { isMobile } = useResponsiveStore()
+const { isMobile } = useResponsive()
 
-const textareaAutosizeRef = ref<InstanceType<typeof TextareaAutosize>>()
-const textareaRef = computed(() => textareaAutosizeRef.value?.$el)
+const textareaAutosizeRef = shallowRef<InstanceType<typeof TextareaAutosize>>()
+const textareaRef = computed(
+  () => textareaAutosizeRef.value?.textareaEle ?? undefined
+)
 
-defineExpose({ textareaAutosizeRef })
+defineExpose({ textareaRef, textareaAutosizeRef })
 
 const { insertText } = useInsertText(textareaRef)
 const { onPaste } = usePaste(emit, insertText)
@@ -106,10 +109,9 @@ const {
   suggesterWidth,
   position,
   suggestedCandidates,
-  selectedCandidateIndex,
-  confirmedPart,
+  selectedIndex,
   onSelect
-} = useSuggester(textareaRef, modelValue)
+} = useSuggester(textareaRef)
 
 const {
   onBeforeInput,

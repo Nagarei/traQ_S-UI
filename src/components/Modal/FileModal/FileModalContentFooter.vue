@@ -14,13 +14,17 @@
 </template>
 
 <script lang="ts" setup>
-import FileModalContentFooterUsername from './FileModalContentFooterUsername.vue'
 import { computed } from 'vue'
+
 import useFileMeta from '/@/composables/files/useFileMeta'
 import useChannelPath from '/@/composables/useChannelPath'
 import { getDateRepresentation } from '/@/lib/basic/date'
-import { useOpenLinkAndClearModal } from '../composables/useOpenLinkFromModal'
+import { setFallbackForNullishOrOnError } from '/@/lib/basic/fallback'
+import { fallbackChannelPath } from '/@/lib/config'
 import { useUsersStore } from '/@/store/entities/users'
+
+import { useOpenLinkAndClearModal } from '../composables/useOpenLinkFromModal'
+import FileModalContentFooterUsername from './FileModalContentFooterUsername.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -45,15 +49,16 @@ const createdAt = computed(() =>
 )
 
 const { channelIdToPathString, channelIdToLink } = useChannelPath()
-const channelPath = computed(() => {
-  try {
-    return fileMeta.value?.channelId
-      ? (channelIdToPathString(fileMeta.value?.channelId, true) ?? '')
-      : ''
-  } catch {
-    return ''
-  }
-})
+
+const channelPath = computed(() =>
+  setFallbackForNullishOrOnError(fallbackChannelPath).exec(() => {
+    const channelId = fileMeta.value?.channelId
+    if (!channelId) return null
+
+    return channelIdToPathString(channelId, true)
+  })
+)
+
 const channelLink = computed(() => {
   try {
     return fileMeta.value?.channelId

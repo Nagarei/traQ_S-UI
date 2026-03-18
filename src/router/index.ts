@@ -1,7 +1,9 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
+
 import { isServerRequestUrl } from '/@/lib/apis'
 import { sessionStorageRedirectKey } from '/@/lib/dom/storage'
+
 import { settingsRoutes } from './settings'
 
 export enum RouteName {
@@ -55,7 +57,7 @@ const routes: RouteRecordRaw[] = [
     component: MainPage
   },
   {
-    path: constructChannelPath(':channel(.*)'),
+    path: constructChannelPath(':channel(.*)?'),
     name: RouteName.Channel,
     component: MainPage
   },

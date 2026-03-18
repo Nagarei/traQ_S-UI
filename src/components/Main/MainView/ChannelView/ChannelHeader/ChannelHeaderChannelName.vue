@@ -24,16 +24,17 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { ChannelId } from '/@/types/entity-ids'
+
 import useChannelPath from '/@/composables/useChannelPath'
+import useResponsive from '/@/composables/useResponsive'
 import { constructChannelPath } from '/@/router'
-import { useResponsiveStore } from '/@/store/ui/responsive'
+import type { ChannelId } from '/@/types/entity-ids'
 
 const props = defineProps<{
   channelId: ChannelId
 }>()
 
-const { isMobile } = useResponsiveStore()
+const { isMobile } = useResponsive()
 
 const { channelIdToPath } = useChannelPath()
 
@@ -55,7 +56,7 @@ const pathInfoList = computed(
 
 const ancestorsPath = computed(() => pathInfoList.value.slice(0, -1))
 const currentChannelLastPath = computed(
-  () => pathInfoList.value[pathInfoList.value.length - 1]?.name ?? ''
+  () => pathInfoList.value.at(-1)?.name ?? ''
 )
 </script>
 

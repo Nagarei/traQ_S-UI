@@ -34,26 +34,27 @@
 </template>
 
 <script lang="ts">
-import { throttle } from 'throttle-debounce'
-import type { Ref } from 'vue'
-import {
-  nextTick,
-  onMounted,
-  onUnmounted,
-  reactive,
-  shallowRef,
-  watch
-} from 'vue'
+import type { ComponentPublicInstance, Ref } from 'vue'
+import { nextTick, onMounted, reactive, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import useMessageScrollerElementResizeObserver from './composables/useMessageScrollerElementResizeObserver'
-import type { LoadingDirection } from './composables/useMessagesFetcher'
+
+import { useEventListener } from '@vueuse/core'
+import { throttle } from 'throttle-debounce'
+
 import { useOpenLink } from '/@/composables/useOpenLink'
 import { embeddingOrigin } from '/@/lib/apis'
 import { toggleSpoiler } from '/@/lib/markdown/spoiler'
-import { isMessageScrollerRoute, RouteName } from '/@/router'
+import { RouteName, isMessageScrollerRoute } from '/@/router'
 import { useStampsStore } from '/@/store/entities/stamps'
 import { useMainViewStore } from '/@/store/ui/mainView'
 import type { MessageId } from '/@/types/entity-ids'
+
+import useMessageScrollerElementResizeObserver from './composables/useMessageScrollerElementResizeObserver'
+import type { LoadingDirection } from './composables/useMessagesFetcher'
+
+export interface MessageScrollerInstance extends ComponentPublicInstance {
+  $el: HTMLDivElement
+}
 
 const LOAD_MORE_THRESHOLD = 10
 
@@ -166,7 +167,9 @@ const { stampsMapFetched } = useStampsStore()
 const rootRef = shallowRef<HTMLElement | null>(null)
 const state = reactive({
   height: 0,
-  scrollTop: lastScrollPosition.value
+  scrollTop: lastScrollPosition.value,
+  // 古いメッセージを読み込むとき、読み込み開始直後は高さの調整を無効化する
+  skipResizeAdjustment: false
 })
 
 const { onChangeHeight, onEntryMessageLoaded } =
@@ -178,16 +181,23 @@ onMounted(() => {
     state.height = rootRef.value?.scrollHeight ?? 0
   }
 })
+
 // マウント後にstampの取得が完了した場合
-watch(stampsMapFetched, async fetched => {
-  if (fetched && rootRef.value) {
+watch(
+  stampsMapFetched,
+  async fetched => {
+    if (!fetched || !rootRef.value) return
+
     await nextTick()
     const scrollHeight = rootRef.value.scrollHeight
     rootRef.value.scrollTop = scrollHeight
     state.height = scrollHeight
     state.scrollTop = scrollHeight
+  },
+  {
+    flush: 'post'
   }
-})
+)
 
 watch(
   () => props.messageIds,
@@ -222,10 +232,18 @@ watch(
       }
       //上に追加された時はスクロール位置を変更する。
       if (props.lastLoadingDirection === 'former') {
+        // onChangeHeight の調整を一時的に無効化
+        state.skipResizeAdjustment = true
         rootRef.value.scrollTo({
           top: newHeight - state.height
         })
         state.height = newHeight
+        // 十分に DOMが更新されたら無効化を解除
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            state.skipResizeAdjustment = false
+          })
+        })
       }
 
       if (props.lastLoadingDirection === 'latest') {
@@ -265,12 +283,8 @@ const visibilitychangeListener = () => {
   }
   emit('resetIsReachedLatest')
 }
-onMounted(() => {
-  document.addEventListener('visibilitychange', visibilitychangeListener)
-})
-onUnmounted(() => {
-  document.removeEventListener('visibilitychange', visibilitychangeListener)
-})
+
+useEventListener(document, 'visibilitychange', visibilitychangeListener)
 
 const { onClick } = useMarkdownInternalHandler()
 useScrollRestoration(rootRef, state)
