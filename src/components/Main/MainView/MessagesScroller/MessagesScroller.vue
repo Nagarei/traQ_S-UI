@@ -17,6 +17,7 @@
     >
       <MessagesScrollerSeparator
         v-if="isReachedEnd"
+        ref="endSeparatorEle"
         title="これ以上メッセージはありません"
         :class="$style.noMoreSeparator"
       />
@@ -142,6 +143,7 @@ const props = withDefaults(
     isLoading?: boolean
     entryMessageId?: MessageId
     lastLoadingDirection: LoadingDirection
+    containerRef?: HTMLDivElement | null
   }>(),
   {
     isLoading: false
@@ -151,6 +153,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'requestLoadFormer'): void
   (e: 'requestLoadLatter'): void
+  (e: 'endSeparatorIntersected'): void
   (e: 'resetIsReachedLatest'): void
   (e: 'scrollPassive'): void
 }>()
@@ -285,6 +288,29 @@ useEventListener(document, 'visibilitychange', visibilitychangeListener)
 
 const { onClick } = useMarkdownInternalHandler()
 useScrollRestoration(rootRef, state)
+
+const endSeparatorEle = shallowRef<{ $el: HTMLDivElement } | undefined>()
+const observer = new IntersectionObserver(
+  entries => {
+    if (entries[0]?.isIntersecting) {
+      emit('endSeparatorIntersected')
+    }
+  },
+  {
+    root: props.containerRef
+  }
+)
+watch(
+  () => props.isReachedEnd,
+  async () => {
+    await nextTick()
+    if (!endSeparatorEle.value || !props.containerRef) return
+    observer.observe(endSeparatorEle.value.$el)
+  }
+)
+onUnmounted(() => {
+  observer.disconnect()
+})
 </script>
 
 <style lang="scss" module>

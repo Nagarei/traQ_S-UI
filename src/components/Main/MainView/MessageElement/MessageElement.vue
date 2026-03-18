@@ -40,8 +40,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, shallowRef, toRef } from 'vue'
 
+import { computed, onMounted, onUnmounted, ref, shallowRef, toRef } from 'vue'
+import type { ChangeHeightData } from './composables/useElementRenderObserver'
+import useElementRenderObserver from './composables/useElementRenderObserver'
+import MessageContents from './MessageContents.vue'
+import MessagePinned from './MessagePinned.vue'
+import MessageStampList from './MessageStampList.vue'
 import MessageTools, {
   useMessageToolsHover
 } from '/@/components/Main/MainView/MessageElement/MessageTools.vue'
@@ -64,6 +69,7 @@ const props = withDefaults(
     pinnedUserId?: UserId
     isEntryMessage?: boolean
     isArchived?: boolean
+    containerRef?: HTMLDivElement | null
   }>(),
   {
     isEntryMessage: false,
@@ -74,6 +80,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'entryMessageLoaded', _relativePos: number): void
   (e: 'changeHeight', _data: ChangeHeightData): void
+  (e: 'intersected', _createdAt: string): void
 }>()
 
 const isActive = ref(false)
@@ -98,9 +105,30 @@ useElementRenderObserver(
 
 const { isHovered, onPointerEnter, onClick, onMouseLeave, onClickOutside } =
   useMessageToolsHover()
+
 const showMessageTools = computed(
   () => (isHovered.value && !isEditing.value) || isActive.value
 )
+
+const observer = new IntersectionObserver(
+  entries => {
+    if (entries[0]?.isIntersecting) {
+      if (message.value === undefined) return
+      emit('intersected', message.value.createdAt)
+    }
+  },
+  {
+    root: props.containerRef,
+    rootMargin: '0px 0px -100%'
+  }
+)
+onMounted(() => {
+  if (bodyRef.value === null || props.containerRef === undefined) return
+  observer.observe(bodyRef.value)
+})
+onUnmounted(() => {
+  observer.disconnect()
+})
 </script>
 
 <style lang="scss" module>
