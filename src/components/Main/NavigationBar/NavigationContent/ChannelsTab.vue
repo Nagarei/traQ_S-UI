@@ -20,33 +20,32 @@
           v-if="query.length === 0"
           v-model:is-starred="filterStarChannel"
           :all-panel-id="allPanelId"
-          :stared-panel-id="staredPanelId"
+          :starred-panel-id="starredPanelId"
         />
         <template v-if="topLevelChannels.length > 0">
-          <ChannelList
+          <ChannelTreeComponent
             v-if="query.length > 0"
-            :channels="filteredChannels"
+            :channels="filteredChannelTree"
             show-topic
+            show-shortened-path
+            prevent-child-topic
           />
           <template v-else-if="filterStarChannel">
-            <template v-if="staredChannels.length > 0">
+            <template v-if="starredChannels.length > 0">
               <ChannelTreeComponent
-                v-if="
-                  featureFlags.dose_construct_strict_starred_channel_tree
-                    .enabled
-                "
-                :id="staredPanelId"
+                v-if="strictStarredChannelTree"
+                :id="starredPanelId"
                 :channels="starredTopLevelChannels"
               />
               <ChannelTreeComponent
                 v-else
-                :id="staredPanelId"
-                :channels="staredChannels"
+                :id="starredPanelId"
+                :channels="starredChannels"
                 show-shortened-path
                 role="tabpanel"
               />
             </template>
-            <EmptyState v-else :id="staredPanelId" role="tabpanel">
+            <EmptyState v-else :id="starredPanelId" role="tabpanel">
               お気に入りチャンネルはありません
             </EmptyState>
           </template>
@@ -64,25 +63,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, toRaw } from 'vue'
+import { computed, toRaw, useId } from 'vue'
 
 import NavigationContentContainer from '/@/components/Main/NavigationBar/NavigationContentContainer.vue'
 import AIcon from '/@/components/UI/AIcon.vue'
 import EmptyState from '/@/components/UI/EmptyState.vue'
 import useChannelPath from '/@/composables/useChannelPath'
-import { randomString } from '/@/lib/basic/randomString'
 import { filterTrees } from '/@/lib/basic/tree'
 import type { ChannelTreeNode } from '/@/lib/channelTree'
 import { constructTreeFromIds } from '/@/lib/channelTree'
 import { useBrowserSettings } from '/@/store/app/browserSettings'
-import { useFeatureFlagSettings } from '/@/store/app/featureFlagSettings'
 import { useChannelTree } from '/@/store/domain/channelTree'
-import { useStaredChannels } from '/@/store/domain/staredChannels'
+import { useStarredChannels } from '/@/store/domain/starredChannels'
 import { useChannelsStore } from '/@/store/entities/channels'
 import { useModalStore } from '/@/store/ui/modal'
 
 import ChannelFilter from '../ChannelList/ChannelFilter.vue'
-import ChannelList from '../ChannelList/ChannelList.vue'
 import ChannelListSelector from '../ChannelList/ChannelListSelector.vue'
 import ChannelTreeComponent from '../ChannelList/ChannelTree.vue'
 import ToggleButton from './ToggleButton.vue'
@@ -90,11 +86,12 @@ import useChannelFilter from './composables/useChannelFilter'
 
 const { pushModal } = useModalStore()
 const { channelTree, starredChannelTree } = useChannelTree()
-const { staredChannelSet } = useStaredChannels()
+const { starredChannelSet } = useStarredChannels()
 const { channelsMap } = useChannelsStore()
 const { channelIdToPathString } = useChannelPath()
 
-const { showArchivedChannels, filterStarChannel } = useBrowserSettings()
+const { showArchivedChannels, filterStarChannel, strictStarredChannelTree } =
+  useBrowserSettings()
 
 // filterTreesは重いのと内部ではreactiveである必要がないのでtoRawする
 const topLevelChannels = computed(() =>
@@ -110,9 +107,9 @@ const starredTopLevelChannels = computed(() =>
   )
 )
 
-const staredChannels = computed(() => {
+const starredChannels = computed(() => {
   const trees = constructTreeFromIds(
-    [...staredChannelSet.value],
+    [...starredChannelSet.value],
     channelsMap.value
   )
   const sortedTrees = sortChannelTree(trees)
@@ -142,8 +139,6 @@ const sortChannelTree = (tree: ChannelTreeNode[]): ChannelTreeNode[] => {
     .filter((v): v is ChannelTreeNode => v !== undefined)
 }
 
-const { featureFlags } = useFeatureFlagSettings()
-
 const channelListForFilter = computed(() =>
   [...channelsMap.value.values()].filter(
     channel => showArchivedChannels.value || !channel.archived
@@ -151,14 +146,23 @@ const channelListForFilter = computed(() =>
 )
 const { query, filteredChannels } = useChannelFilter(channelListForFilter)
 
+const filteredChannelTree = computed(() => {
+  const rootIds = filteredChannels.value.map(c => c.id)
+
+  return filterTrees(
+    constructTreeFromIds(rootIds, channelsMap.value),
+    channel => !channel.archived
+  )
+})
+
 const onClickButton = () => {
   pushModal({
     type: 'channel-create'
   })
 }
 
-const allPanelId = randomString()
-const staredPanelId = randomString()
+const allPanelId = useId()
+const starredPanelId = useId()
 </script>
 
 <style lang="scss" module>

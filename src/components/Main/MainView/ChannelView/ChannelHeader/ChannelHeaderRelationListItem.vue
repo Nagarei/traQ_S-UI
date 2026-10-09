@@ -1,7 +1,7 @@
 <template>
   <RouterLink :id="linkId" :to="channelLink" :class="$style.wrap">
     <div :class="$style.channelName"># {{ props.channel.name }}</div>
-    <div :class="[$style.topic, isTopicEmpty && $style.empty]">
+    <div :class="[$style.topic, isTopicEmpty && $style.empty]" dir="auto">
       {{ topic }}
     </div>
   </RouterLink>
@@ -10,17 +10,16 @@
 <script setup lang="ts">
 import type { Channel } from '@traptitech/traq'
 
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import useChannelPath from '/@/composables/useChannelPath'
-import { randomString } from '/@/lib/basic/randomString'
 
 const props = defineProps<{
   channel: Channel
 }>()
 
-const linkId = randomString()
+const linkId = useId()
 const focus = () => {
   // HACK: RouterLink が focus できないので、id から HTMLElement を取得して focus する
   const link = document.getElementById(linkId) as HTMLElement | null
@@ -54,6 +53,7 @@ defineExpose({ focus })
   contain: var(--contain-strict);
   height: 1.5rem;
   line-height: 1.5rem;
+  text-align: left;
 }
 
 .channelName {

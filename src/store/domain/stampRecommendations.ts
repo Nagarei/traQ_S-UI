@@ -75,7 +75,7 @@ export const useTopStampIds = () => {
   const { recentStampIds } = useStampHistory()
 
   const topStampIds = computed(() =>
-    featureFlags.value.stamp_recommendation.enabled
+    featureFlags.value.stamp_recommendation_v2.enabled
       ? stampRecommendations.value
       : recentStampIds.value
   )

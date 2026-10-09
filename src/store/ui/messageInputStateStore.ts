@@ -85,6 +85,7 @@ const useMessageInputStateStorePinia = defineStore(
       const st = virtualIds.has(cId_) ? virtualChannelStates : states
       return st.value.get(cId_)
     }
+
     const setStore = (cId: MessageInputStateKey, v: MessageInputState) => {
       const cId_ = unref(cId)
       const st = virtualIds.has(cId_) ? virtualChannelStates : states

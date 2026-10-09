@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.container">
-    <div :class="$style.name">
+    <div :class="$style.name" dir="auto">
       {{ palette.name }}
     </div>
     <router-link
@@ -16,14 +16,17 @@
       @click="showStampPaletteDeleteToast"
     />
   </div>
-  <p :class="$style.description">
-    {{ palette.description }}
-  </p>
+  <MarkdownPreview
+    :class="$style.description"
+    :content="palette.description"
+    accept-action
+  />
 </template>
 
 <script lang="ts" setup>
 import AIcon from '/@/components/UI/AIcon.vue'
 import IconButton from '/@/components/UI/IconButton.vue'
+import MarkdownPreview from '/@/components/UI/MarkdownPreview.vue'
 import useExecWithToast from '/@/composables/toast/useExecWithToast'
 import { constructSettingsStampPaletteDetailPath } from '/@/router/settingsStampPalette'
 import { useStampPalettesStore } from '/@/store/entities/stampPalettes'
@@ -59,6 +62,7 @@ const showStampPaletteDeleteToast = async () => {
   padding: 4px 8px;
   border-radius: 4px;
   margin-right: 8px;
+  text-align: left;
 }
 .link {
   @include color-ui-secondary;
@@ -80,6 +84,5 @@ const showStampPaletteDeleteToast = async () => {
 .description {
   @include color-ui-secondary;
   @include size-body2;
-  white-space: pre-wrap;
 }
 </style>

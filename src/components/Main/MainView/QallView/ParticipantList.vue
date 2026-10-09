@@ -24,7 +24,7 @@ const isMuted = ref(false)
 const style = useCssModule()
 const minValue = 0
 const maxValue = 2
-const volume = ref<number | string>(getStore(trackInfo.username) ?? 1)
+const volume = ref<number | string>(getStore(trackInfo.userName) ?? 1)
 
 const sliderStyle = computed(() => {
   const val = parseToFloat(volume.value)
@@ -42,7 +42,7 @@ const sliderStyle = computed(() => {
   }
 })
 watch(
-  () => getStore(trackInfo.username),
+  () => getStore(trackInfo.userName),
   v => {
     if (v) {
       volume.value = v
@@ -53,7 +53,7 @@ watch(
 watch(
   () => volume.value,
   v => {
-    setStore(trackInfo.username, parseToFloat(v))
+    setStore(trackInfo.userName, parseToFloat(v))
   },
   { deep: true, immediate: true }
 )
@@ -67,7 +67,7 @@ const volumeSliderClass = computed(() => ({
   <div :class="$style.container">
     <div :class="$style.leftSide">
       <UserIcon :size="40" :user-id="participant.id" />
-      <span :class="$style.userName">{{ participant.displayName }}</span>
+      <bdi :class="$style.userName">{{ participant.displayName }}</bdi>
       <!-- TODO: Qall: ミュートを実装する -->
       <!-- <button :class="$style.micIconButton">
         <a-icon v-if="isMuted" name="microphone-off" mdi />

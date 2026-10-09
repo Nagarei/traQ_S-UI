@@ -31,10 +31,11 @@
 </template>
 
 <script lang="ts" setup>
+import { useId } from 'vue'
+
 import AIcon from '/@/components/UI/AIcon.vue'
 import useShowPassword from '/@/composables/dom/useShowPassword'
 import useOnInput from '/@/composables/useOnInput'
-import { randomString } from '/@/lib/basic/randomString'
 
 const modelValue = defineModel<string>({ default: '' })
 
@@ -46,13 +47,7 @@ const props = withDefaults(
     autofocus?: boolean
     autocapitalize?: string
     enterkeyhint?:
-      | 'search'
-      | 'done'
-      | 'enter'
-      | 'go'
-      | 'next'
-      | 'previous'
-      | 'send'
+      'search' | 'done' | 'enter' | 'go' | 'next' | 'previous' | 'send'
   }>(),
   {
     label: '',
@@ -64,7 +59,7 @@ const props = withDefaults(
 
 const onInput = useOnInput(modelValue)
 
-const id = randomString()
+const id = useId()
 
 const { isPasswordShown, togglePassword, typeWithShown } =
   useShowPassword(props)

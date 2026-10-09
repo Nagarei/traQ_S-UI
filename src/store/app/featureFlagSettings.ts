@@ -17,7 +17,7 @@ export type FeatureFlag = FeatureFlagDescription & { enabled: boolean }
 
 /*
   *** FeatureFlag の利用仮ルール ***
-  - 日時の指定は最大一ヶ月先まで （FeatureFlag の利用を前提とした・FeatureFlag を乱用した運用を避けるため。期間後に本実装するかを検討する）
+  - 日時の指定を不必要に長くしない （FeatureFlag の利用を前提とした・FeatureFlag を乱用した運用を避けるため。期間中に本実装するかを検討する）
   - 利用しなくなった FeatureFlag は削除する
   - 仮ルールなので必要に応じて変えてほしいです
 */
@@ -37,19 +37,13 @@ export const featureFlagDescriptions = {
     defaultValue: isWebKit(),
     endAt: new Date('9999-12-31T00:00')
   },
-  dose_construct_strict_starred_channel_tree: {
-    title: 'お気に入りチャンネルをツリー表示',
+  // 旧フラグの保存値を引き継がず、既存ユーザーも有効な状態から始める
+  stamp_recommendation_v2: {
+    title: 'スタンプのレコメンデーション',
     description:
-      'お気に入りチャンネル一覧を、お気に入りに登録されたチャンネルのみの木構造で表示します。',
-    defaultValue: false,
-    endAt: new Date('2025-12-31T23:59')
-  },
-  stamp_recommendation: {
-    title: 'スタンプのレコメンド機能',
-    description:
-      'スタンプのレコメンド機能を有効にします。スタンプ履歴が用いられている部分をレコメンドで置き換えます。',
-    defaultValue: false,
-    endAt: new Date('2026-01-31T23:59')
+      'スタンプ履歴の代わりに、利用傾向に合わせたおすすめを表示するようにします。',
+    defaultValue: true,
+    endAt: new Date('2026-10-29T23:59')
   }
 } as const satisfies Record<string, FeatureFlagDescription>
 

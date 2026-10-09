@@ -4,7 +4,7 @@
     :subtitle="name"
     icon-name="group"
     return-button
-    edit-button
+    :edit-button="isAdmin"
     @edit="onGroupEdit"
   >
     <UserListItem
@@ -14,7 +14,7 @@
       :is-admin="user.isAdmin"
       :class="$style.item"
     >
-      <div :class="$style.role">
+      <div :class="$style.role" dir="auto">
         {{ user.role }}
       </div>
       <div v-if="user.isAdmin && !user.isMember" :class="$style.nonMemberAdmin">
@@ -29,6 +29,7 @@ import type { UserGroupMember } from '@traptitech/traq'
 
 import { computed } from 'vue'
 
+import { useMeStore } from '/@/store/domain/me'
 import { useGroupsStore } from '/@/store/entities/groups'
 import { useUsersStore } from '/@/store/entities/users'
 
@@ -67,10 +68,17 @@ const users = computed((): UserGroupMemberOrAdmin[] => {
   ].filter(m => activeUsersMap.value.has(m.id))
 })
 
+const { myId } = useMeStore()
+const isAdmin = computed(() => {
+  if (!group.value) return false
+  if (!myId.value) return false
+  return group.value.admins.includes(myId.value)
+})
+
 const { openLinkAndClearModal } = useOpenLinkAndClearModal()
 
 const onGroupEdit = (event: MouseEvent) => {
-  openLinkAndClearModal(event, '/group-manager')
+  openLinkAndClearModal(event, `/group-manager#${group.value?.id}`)
 }
 </script>
 
@@ -90,6 +98,7 @@ const onGroupEdit = (event: MouseEvent) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 .nonMemberAdmin {
   @include color-ui-secondary;
